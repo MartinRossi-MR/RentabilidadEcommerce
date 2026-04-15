@@ -98,6 +98,15 @@ select{font-family:-apple-system,sans-serif}
     <div class="chip" id="chip-cac"><span class="chip-lbl">CAC</span><span class="chip-val" id="cv-cac">—</span></div>
     <div class="chip" id="chip-be"><span class="chip-lbl">Break-even</span><span class="chip-val" id="cv-be">—</span></div>
   </div>
+  <div style="display:flex;align-items:center;gap:10px;margin-left:12px">
+    <span id="save-indicator" style="font-size:10px;color:#64748b;display:flex;align-items:center;gap:4px;min-width:90px">
+      <span id="save-dot" style="width:6px;height:6px;border-radius:50%;background:#64748b;display:inline-block;transition:background .3s"></span>
+      <span id="save-txt">Cargando...</span>
+    </span>
+    <button onclick="resetAll()" title="Borra todos los datos guardados y vuelve a los valores por defecto" style="padding:5px 12px;background:rgba(220,38,38,.15);border:1px solid rgba(220,38,38,.3);border-radius:6px;color:#fca5a5;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit;white-space:nowrap">
+      Nueva simulación
+    </button>
+  </div>
 </header>
 
 <nav id="tabnav">
@@ -304,8 +313,8 @@ select{font-family:-apple-system,sans-serif}
       <div class="field">
         <label>¿El envío lo absorbés vos (envío gratis)?</label>
         <div class="tgroup">
-          <button class="tbg on" id="env-si" onclick="S.log.gratis=true;this.classList.add('on');document.getElementById('env-no').classList.remove('on');R()">Sí, yo pago el envío</button>
-          <button class="tbg" id="env-no" onclick="S.log.gratis=false;this.classList.add('on');document.getElementById('env-si').classList.remove('on');R()">El cliente paga</button>
+          <button class="tbg on" id="env-si" onclick="S.log.gratis=true;this.classList.add('on');document.getElementById('env-no').classList.remove('on');R();scheduleSave()">Sí, yo pago el envío</button>
+          <button class="tbg" id="env-no" onclick="S.log.gratis=false;this.classList.add('on');document.getElementById('env-si').classList.remove('on');R();scheduleSave()">El cliente paga</button>
         </div>
       </div>
       <div class="field"><label>Fulfillment tercerizado por unidad (ARS)</label><input type="number" id="l-ff" value="0" step="200" min="0" oninput="S.log.fulfillment=+this.value;R()"></div>
@@ -1098,6 +1107,7 @@ function selMP(key, btn) {
   document.querySelectorAll('#mp-sel .tbg').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   R();
+  scheduleSave();
 }
 
 function resetSim() {
@@ -1109,10 +1119,214 @@ function resetSim() {
 }
 
 // ============================================================
+// LOCALSTORAGE — guardado, carga y reset
+// Todos los datos se guardan SOLO en el navegador del usuario.
+// Esta herramienta es 100% client-side: ningún servidor recibe ni almacena datos.
+// ============================================================
+const LS_KEY = 'ecommerce_ar_v1';
+let _saveTimer = null;
+
+function saveState() {
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify(S));
+    setSaveIndicator('saved');
+  } catch(e) {
+    setSaveIndicator('error');
+  }
+}
+
+function setSaveIndicator(status) {
+  const dot = document.getElementById('save-dot');
+  const txt = document.getElementById('save-txt');
+  if(!dot || !txt) return;
+  if(status === 'saving') {
+    dot.style.background = '#fbbf24'; txt.textContent = 'Guardando...';
+  } else if(status === 'saved') {
+    dot.style.background = '#34d399'; txt.textContent = 'Guardado ✓';
+    setTimeout(()=>{ dot.style.background='#64748b'; txt.textContent='Auto-guardado'; }, 2000);
+  } else if(status === 'error') {
+    dot.style.background = '#f87171'; txt.textContent = 'Error al guardar';
+  } else if(status === 'loaded') {
+    dot.style.background = '#60a5fa'; txt.textContent = 'Datos cargados';
+    setTimeout(()=>{ dot.style.background='#64748b'; txt.textContent='Auto-guardado'; }, 2500);
+  } else {
+    dot.style.background = '#64748b'; txt.textContent = 'Auto-guardado';
+  }
+}
+
+// Guarda con debounce de 600ms para no saturar en cada keystroke
+function scheduleSave() {
+  setSaveIndicator('saving');
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(saveState, 600);
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if(!raw) return false;
+    const saved = JSON.parse(raw);
+    // Merge profundo para no perder claves nuevas si el usuario tiene una versión vieja
+    if(saved.cfg) {
+      if(saved.cfg.mp)    Object.assign(S.cfg.mp, saved.cfg.mp);
+      if(saved.cfg.zonas) Object.assign(S.cfg.zonas, saved.cfg.zonas);
+      if(saved.cfg.iibb    !== undefined) S.cfg.iibb    = saved.cfg.iibb;
+      if(saved.cfg.iva     !== undefined) S.cfg.iva     = saved.cfg.iva;
+      if(saved.cfg.tiendanube !== undefined) S.cfg.tiendanube = saved.cfg.tiendanube;
+      if(saved.cfg.usd    !== undefined) S.cfg.usd    = saved.cfg.usd;
+    }
+    if(saved.pr) Object.assign(S.pr, saved.pr);
+    if(saved.mkt) {
+      if(saved.mkt.canales) S.mkt.canales = saved.mkt.canales;
+      if(saved.mkt.sesiones   !== undefined) S.mkt.sesiones   = saved.mkt.sesiones;
+      if(saved.mkt.conversion !== undefined) S.mkt.conversion = saved.mkt.conversion;
+      if(saved.mkt.nuevos     !== undefined) S.mkt.nuevos     = saved.mkt.nuevos;
+      if(saved.mkt.frecuencia !== undefined) S.mkt.frecuencia = saved.mkt.frecuencia;
+    }
+    if(saved.log) Object.assign(S.log, saved.log);
+    if(saved.est) Object.assign(S.est, saved.est);
+    return true;
+  } catch(e) {
+    return false;
+  }
+}
+
+// Vuelca el estado S a todos los inputs del DOM
+function applyStateToDOM() {
+  const set = (id, v) => { const e = document.getElementById(id); if(e) e.value = v; };
+  // Config
+  document.querySelectorAll('#tab-config input[type=number]').forEach(() => {}); // handled individually
+  // Los inputs de config no tienen id únicos — los seteamos por posición de la estructura
+  // Usamos una tabla de mapeo id → path en S
+  const configInputs = [
+    // [selector_aproximado, valor]
+    // Los inputs de config son los primeros number inputs del tab
+  ];
+  // Mejor estrategia: reasignar directamente via los selectores que tenemos
+  setInputByTabOrder('tab-config', [
+    S.cfg.mp['1p'], S.cfg.mp['3c'], S.cfg.mp['6c'], S.cfg.mp['12c'], S.cfg.mp['18c'],
+    S.cfg.iibb, S.cfg.iva, S.cfg.tiendanube, S.cfg.usd,
+    S.cfg.zonas.amba, S.cfg.zonas.int_c, S.cfg.zonas.int_l, S.cfg.zonas.noa, S.cfg.zonas.pat
+  ]);
+
+  // Producto
+  set('p-nombre', S.pr.nombre);
+  set('p-costo',  S.pr.costo);
+  set('p-pack',   S.pr.packaging);
+  set('p-foto',   S.pr.foto);
+  set('p-otros',  S.pr.otros);
+  set('p-precio', S.pr.precio);
+  const monedaSel = document.getElementById('p-moneda');
+  if(monedaSel) monedaSel.value = S.pr.moneda;
+
+  // Método de pago
+  document.querySelectorAll('#mp-sel .tbg').forEach(b => b.classList.remove('on'));
+  const mpBtns = {'1p':0,'3c':1,'6c':2,'12c':3,'18c':4};
+  const mpIdx = mpBtns[S.pr.mpKey];
+  const mpBtnList = document.querySelectorAll('#mp-sel .tbg');
+  if(mpBtnList[mpIdx]) mpBtnList[mpIdx].classList.add('on');
+
+  // Marketing
+  set('m-ses',    S.mkt.sesiones);
+  set('m-conv',   S.mkt.conversion);
+  set('m-nuevos', S.mkt.nuevos);
+  set('m-freq',   S.mkt.frecuencia);
+
+  // Logística
+  const zonaSel = document.getElementById('l-zona');
+  if(zonaSel) zonaSel.value = S.log.zona;
+  set('l-ff',  S.log.fulfillment);
+  set('l-seg', S.log.seguro);
+  set('l-rev', S.log.reversa);
+  set('l-rec', S.log.recuperacion);
+  const slDev = document.getElementById('sl-dev');
+  if(slDev) { slDev.value = S.log.devRate; }
+  const dvv = document.getElementById('dev-rate-v');
+  if(dvv) dvv.textContent = S.log.devRate + '%';
+  // Botones de envío gratis
+  const envSi = document.getElementById('env-si');
+  const envNo = document.getElementById('env-no');
+  if(envSi && envNo) {
+    if(S.log.gratis) { envSi.classList.add('on'); envNo.classList.remove('on'); }
+    else             { envNo.classList.add('on'); envSi.classList.remove('on'); }
+  }
+
+  // Estructura
+  set('e-sue', S.est.sueldos);
+  set('e-alq', S.est.alquiler);
+  set('e-her', S.est.herramientas);
+  set('e-con', S.est.contaduria);
+  set('e-web', S.est.web);
+  set('e-srv', S.est.servicios);
+  set('e-otr', S.est.otros);
+  set('e-ud',  S.est.unidades);
+}
+
+function setInputByTabOrder(tabId, values) {
+  const tab = document.getElementById('tab-' + tabId);
+  if(!tab) return;
+  const inputs = tab.querySelectorAll('input[type=number]');
+  values.forEach((v, i) => { if(inputs[i]) inputs[i].value = v; });
+}
+
+function resetAll() {
+  if(!confirm('¿Borrar todos los datos guardados y empezar desde cero?\nEsta acción no se puede deshacer.')) return;
+  localStorage.removeItem(LS_KEY);
+  // Resetear S a defaults
+  S.cfg = {
+    mp: {'1p':2.99,'3c':5.99,'6c':9.99,'12c':13.99,'18c':17.99},
+    iibb:3, iva:21, tiendanube:15999, usd:1180,
+    zonas:{amba:2800,int_c:3800,int_l:5200,noa:7500,pat:9000}
+  };
+  S.pr  = {nombre:'Mi Producto',costo:10000,moneda:'ARS',packaging:400,foto:0,otros:0,precio:25000,mpKey:'1p'};
+  S.mkt = {
+    canales:[
+      {nombre:'Meta Ads',inv:30000,rev:90000},
+      {nombre:'Google Ads',inv:20000,rev:55000},
+      {nombre:'TikTok Ads',inv:0,rev:0},
+      {nombre:'Influencers',inv:0,rev:0},
+    ],
+    sesiones:1000, conversion:1.5, nuevos:10, frecuencia:1.5
+  };
+  S.log = {zona:'amba',gratis:true,devRate:2,reversa:2500,recuperacion:70,fulfillment:0,seguro:0};
+  S.est = {sueldos:0,alquiler:0,herramientas:2000,contaduria:8000,web:3000,servicios:0,otros:0,unidades:30};
+  applyStateToDOM();
+  buildMarketingTable();
+  R();
+  setSaveIndicator('default');
+  const dot = document.getElementById('save-dot');
+  const txt = document.getElementById('save-txt');
+  if(dot && txt){ dot.style.background='#94a3b8'; txt.textContent='Datos reseteados'; }
+  setTimeout(()=>setSaveIndicator('idle'), 2500);
+}
+
+// Parchear R() para que guarde después de cada recálculo
+const _R_original = R;
+window.R = function() { _R_original(); scheduleSave(); };
+
+// ============================================================
 // INIT
 // ============================================================
 window.addEventListener('DOMContentLoaded', () => {
+  const hadData = loadState();
   buildMarketingTable();
+  if(hadData) {
+    applyStateToDOM();
+    // Rebuild marketing table con los datos guardados
+    const tbody = document.getElementById('ch-tbody');
+    if(tbody) {
+      tbody.innerHTML = S.mkt.canales.map((c,i) => `
+        <tr>
+          <td>${c.nombre}</td>
+          <td><input class="ci" type="number" value="${c.inv}" step="5000" min="0" oninput="S.mkt.canales[${i}].inv=+this.value;R()"></td>
+          <td><input class="ci" type="number" value="${c.rev}" step="5000" min="0" oninput="S.mkt.canales[${i}].rev=+this.value;R()"></td>
+          <td class="num" id="roas-${i}">—</td>
+        </tr>`).join('');
+    }
+    setSaveIndicator('loaded');
+  } else {
+    setSaveIndicator('idle');
+  }
   R();
 });
 </script>
