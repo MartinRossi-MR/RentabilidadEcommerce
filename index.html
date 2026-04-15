@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rentabilidad Ecommerce AR — Sistema Integral</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f1f5f9;--surf:#fff;--bdr:#e2e8f0;--bdr2:#cbd5e0;
+  --t1:#1e293b;--t2:#475569;--t3:#94a3b8;
+  --blue:#2563eb;--bluebg:#eff6ff;--bluebdr:#bfdbfe;
+  --green:#059669;--greenbg:#ecfdf5;--greenbdr:#a7f3d0;
+  --amber:#d97706;--amberbg:#fffbeb;--amberbdr:#fde68a;
+  --red:#dc2626;--redbg:#fef2f2;--redbdr:#fecaca;
+  --r:8px;--rl:12px;
+}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--t1);font-size:14px;min-height:100vh}
+#header{background:#0f172a;color:#fff;padding:0 20px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200}
+.htitle{font-size:14px;font-weight:600;display:flex;align-items:center;gap:10px}
+.hsub{font-size:11px;color:#64748b;font-weight:400}
+.hkpis{display:flex;gap:6px}
+.chip{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:7px;padding:4px 10px;display:flex;flex-direction:column;align-items:center;min-width:80px}
+.chip-lbl{font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em}
+.chip-val{font-size:14px;font-weight:600;font-family:'Courier New',monospace;color:#fff}
+.chip.ok .chip-val{color:#34d399}.chip.warn .chip-val{color:#fbbf24}.chip.bad .chip-val{color:#f87171}
+#tabnav{background:#fff;border-bottom:1px solid var(--bdr);padding:0 20px;display:flex;position:sticky;top:54px;z-index:100;overflow-x:auto}
+.tbtn{background:none;border:none;border-bottom:2px solid transparent;padding:12px 14px;font-size:12px;font-weight:500;color:var(--t3);cursor:pointer;white-space:nowrap;font-family:inherit;transition:color .15s}
+.tbtn:hover{color:var(--t2)}.tbtn.on{color:var(--blue);border-bottom-color:var(--blue)}
+#content{max-width:1280px;margin:0 auto;padding:20px}
+.panel{display:none}.panel.on{display:block}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.glr{display:grid;grid-template-columns:1fr 400px;gap:18px;align-items:start}
+.stack{display:flex;flex-direction:column;gap:16px}
+.card{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--rl);padding:18px}
+.ctitle{font-size:12px;font-weight:600;color:var(--t1);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.csub{font-size:10px;color:var(--t3);font-weight:400}
+.sh{margin-bottom:16px}.sh h2{font-size:17px;font-weight:600;margin-bottom:2px}.sh p{font-size:12px;color:var(--t2)}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:11px;font-weight:500;color:var(--t2);margin-bottom:4px}
+input[type=number],input[type=text],select{width:100%;padding:7px 9px;border:1px solid var(--bdr);border-radius:var(--r);font-size:13px;font-family:'Courier New',monospace;color:var(--t1);background:#fff;outline:none;transition:border-color .15s}
+input[type=number]:focus,input[type=text]:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.08)}
+input[type=number]{-moz-appearance:textfield}input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+input[type=range]{width:100%;accent-color:var(--blue);cursor:pointer;margin:4px 0}
+select{font-family:-apple-system,sans-serif}
+.tgroup{display:flex;gap:5px;flex-wrap:wrap}
+.tbg{flex:1;min-width:55px;padding:6px 5px;border:1px solid var(--bdr);border-radius:var(--r);background:#fff;font-size:11px;cursor:pointer;font-family:inherit;font-weight:500;color:var(--t2);text-align:center;transition:all .15s}
+.tbg.on{background:var(--bluebg);border-color:var(--blue);color:var(--blue)}
+.dt{width:100%;border-collapse:collapse;font-size:12px}
+.dt th{text-align:left;padding:7px 10px;font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--bdr);background:var(--bg)}
+.dt td{padding:9px 10px;border-bottom:1px solid var(--bdr);color:var(--t1);vertical-align:middle}
+.dt tr:last-child td{border-bottom:none}
+.dt .tot td{font-weight:600;background:var(--bg);border-top:2px solid var(--bdr2);border-bottom:none}
+.dt .ok-row td{background:var(--greenbg);color:var(--green);font-weight:600}
+.dt .bad-row td{background:var(--redbg);color:var(--red);font-weight:600}
+.num{font-family:'Courier New',monospace;text-align:right}
+.pct{font-family:'Courier New',monospace;text-align:right;color:var(--t3);font-size:11px}
+.neg{color:var(--red)}.pos{color:var(--green)}.neu{color:var(--t2)}
+.ci{width:100%;padding:5px 7px;border:1px solid var(--bdr);border-radius:6px;font-size:12px;font-family:'Courier New',monospace;background:#fff;outline:none}
+.ci:focus{border-color:var(--blue)}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.m{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:12px 14px}
+.m-lbl{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.m-val{font-size:20px;font-weight:600;font-family:'Courier New',monospace;color:var(--t1);margin-bottom:2px}
+.m-sub{font-size:10px;color:var(--t3);line-height:1.4}
+.m.green{border-left:3px solid var(--green)}.m.green .m-val{color:var(--green)}
+.m.amber{border-left:3px solid var(--amber)}.m.amber .m-val{color:var(--amber)}
+.m.red{border-left:3px solid var(--red)}.m.red .m-val{color:var(--red)}
+.m.blue{border-left:3px solid var(--blue)}.m.blue .m-val{color:var(--blue)}
+.cc{position:relative;width:100%}
+.srow{margin-bottom:14px}
+.slbl-row{display:flex;justify-content:space-between;margin-bottom:4px}
+.slbl{font-size:12px;font-weight:500;color:var(--t2)}
+.sval{font-size:12px;font-family:'Courier New',monospace;color:var(--blue);font-weight:600}
+.note{background:var(--bluebg);border:1px solid var(--bluebdr);border-radius:var(--r);padding:9px 12px;font-size:11px;color:#1d4ed8;margin-bottom:16px;line-height:1.5}
+.warn-box{background:var(--amberbg);border:1px solid var(--amberbdr);border-radius:var(--r);padding:9px 12px;font-size:11px;color:#92400e;line-height:1.5}
+.sep{height:1px;background:var(--bdr);margin:14px 0}
+.wl{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
+.wl-i{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--t2)}
+.wl-d{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.footer-note{font-size:10px;color:var(--t3);margin-top:28px;padding-top:14px;border-top:1px solid var(--bdr);text-align:center;line-height:1.6}
+</style>
+</head>
+<body>
+
+<header id="header">
+  <div class="htitle">
+    <span>Rentabilidad Ecommerce AR</span>
+    <span class="hsub">Sistema integral · Tiendanube + MP + Andreani</span>
+  </div>
+  <div class="hkpis">
+    <div class="chip" id="chip-mn"><span class="chip-lbl">Margen neto</span><span class="chip-val" id="cv-mn">—</span></div>
+    <div class="chip" id="chip-mb"><span class="chip-lbl">Margen bruto</span><span class="chip-val" id="cv-mb">—</span></div>
+    <div class="chip" id="chip-roas"><span class="chip-lbl">ROAS</span><span class="chip-val" id="cv-roas">—</span></div>
+    <div class="chip" id="chip-cac"><span class="chip-lbl">CAC</span><span class="chip-val" id="cv-cac">—</span></div>
+    <div class="chip" id="chip-be"><span class="chip-lbl">Break-even</span><span class="chip-val" id="cv-be">—</span></div>
+  </div>
+</header>
+
+<nav id="tabnav">
+  <button class="tbtn on" onclick="showTab('config',this)">01 · Configuración</button>
+  <button class="tbtn" onclick="showTab('producto',this)">02 · Producto</button>
+  <button class="tbtn" onclick="showTab('marketing',this)">03 · Marketing</button>
+  <button class="tbtn" onclick="showTab('logistica',this)">04 · Logística</button>
+  <button class="tbtn" onclick="showTab('estructura',this)">05 · Estructura</button>
+  <button class="tbtn" onclick="showTab('dashboard',this)">06 · Dashboard P&amp;L</button>
+  <button class="tbtn" onclick="showTab('escenarios',this)">07 · Escenarios</button>
+</nav>
+
+<main id="content">
+
+<!-- TAB 1: CONFIGURACIÓN -->
+<section id="tab-config" class="panel on">
+<div class="sh"><h2>Configuración global</h2><p>Actualizá estas tasas periódicamente. Todo el sistema lee desde aquí — un cambio se propaga a todos los módulos.</p></div>
+<div class="note">Las comisiones de Mercado Pago y tarifas de Andreani cambian con frecuencia. Verificá siempre en el portal oficial antes de tomar decisiones comerciales.</div>
+<div class="g2" style="margin-bottom:16px">
+  <div class="card">
+    <div class="ctitle">Comisiones Mercado Pago <span class="csub">% sin IVA · Checkout Pro en Tiendanube</span></div>
+    <div class="field"><label>1 pago</label><input type="number" value="2.99" step="0.01" min="0" oninput="S.cfg.mp['1p']=+this.value;R()"></div>
+    <div class="field"><label>3 cuotas sin interés</label><input type="number" value="5.99" step="0.01" min="0" oninput="S.cfg.mp['3c']=+this.value;R()"></div>
+    <div class="field"><label>6 cuotas sin interés</label><input type="number" value="9.99" step="0.01" min="0" oninput="S.cfg.mp['6c']=+this.value;R()"></div>
+    <div class="field"><label>12 cuotas sin interés</label><input type="number" value="13.99" step="0.01" min="0" oninput="S.cfg.mp['12c']=+this.value;R()"></div>
+    <div class="field" style="margin-bottom:0"><label>18 cuotas sin interés</label><input type="number" value="17.99" step="0.01" min="0" oninput="S.cfg.mp['18c']=+this.value;R()"></div>
+  </div>
+  <div class="stack">
+    <div class="card">
+      <div class="ctitle">Impuestos y retenciones</div>
+      <div class="g2">
+        <div class="field" style="margin-bottom:0"><label>IIBB (%)</label><input type="number" value="3" step="0.1" min="0" oninput="S.cfg.iibb=+this.value;R()"></div>
+        <div class="field" style="margin-bottom:0"><label>IVA sobre comisión (%)</label><input type="number" value="21" step="1" min="0" oninput="S.cfg.iva=+this.value;R()"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ctitle">Tiendanube</div>
+      <div class="field" style="margin-bottom:0"><label>Plan mensual (ARS)</label><input type="number" value="15999" step="500" min="0" oninput="S.cfg.tiendanube=+this.value;R()"></div>
+    </div>
+    <div class="card">
+      <div class="ctitle">Tipo de cambio</div>
+      <div class="field" style="margin-bottom:0"><label>1 USD = X pesos (ARS)</label><input type="number" value="1180" step="10" min="1" oninput="S.cfg.usd=+this.value;R()"></div>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div class="ctitle">Tarifas Andreani por zona <span class="csub">ARS · actualizá según tu contrato o cotización vigente</span></div>
+  <table class="dt">
+    <thead><tr><th>Zona</th><th>Ciudades principales</th><th style="width:180px">Costo base (ARS)</th></tr></thead>
+    <tbody>
+      <tr><td><strong>AMBA</strong></td><td class="neu">Capital Federal + Gran Buenos Aires</td><td><input class="ci" type="number" value="2800" step="100" oninput="S.cfg.zonas.amba=+this.value;R()"></td></tr>
+      <tr><td><strong>Interior cercano</strong></td><td class="neu">Córdoba, Rosario, La Plata, Mar del Plata</td><td><input class="ci" type="number" value="3800" step="100" oninput="S.cfg.zonas.int_c=+this.value;R()"></td></tr>
+      <tr><td><strong>Interior lejano</strong></td><td class="neu">Mendoza, Santa Fe, San Luis, Entre Ríos</td><td><input class="ci" type="number" value="5200" step="100" oninput="S.cfg.zonas.int_l=+this.value;R()"></td></tr>
+      <tr><td><strong>NOA / NEA</strong></td><td class="neu">Salta, Jujuy, Misiones, Chaco, Formosa</td><td><input class="ci" type="number" value="7500" step="100" oninput="S.cfg.zonas.noa=+this.value;R()"></td></tr>
+      <tr><td><strong>Patagonia</strong></td><td class="neu">Neuquén, Río Negro, Santa Cruz, T. del Fuego</td><td><input class="ci" type="number" value="9000" step="100" oninput="S.cfg.zonas.pat=+this.value;R()"></td></tr>
+    </tbody>
+  </table>
+</div>
+</section>
+
+<!-- TAB 2: PRODUCTO -->
+<section id="tab-producto" class="panel">
+<div class="sh"><h2>Producto &amp; canal</h2><p>Economía unitaria. Cada cambio se propaga en tiempo real a todos los módulos.</p></div>
+<div class="glr">
+  <div class="stack">
+    <div class="card">
+      <div class="ctitle">Datos del producto</div>
+      <div class="field"><label>Nombre del producto</label><input type="text" id="p-nombre" value="Mi Producto" oninput="S.pr.nombre=this.value;R()"></div>
+      <div class="g2">
+        <div class="field"><label>Costo de compra / producción</label><input type="number" id="p-costo" value="10000" step="100" min="0" oninput="S.pr.costo=+this.value;R()"></div>
+        <div class="field"><label>Moneda del costo</label>
+          <select id="p-moneda" onchange="S.pr.moneda=this.value;R()">
+            <option value="ARS">ARS (pesos)</option>
+            <option value="USD">USD (dólares)</option>
+          </select>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="field"><label>Packaging / embalaje (ARS)</label><input type="number" id="p-pack" value="400" step="50" min="0" oninput="S.pr.packaging=+this.value;R()"></div>
+        <div class="field"><label>Fotografía / contenido amort. (ARS)</label><input type="number" id="p-foto" value="0" step="500" min="0" oninput="S.pr.foto=+this.value;R()"></div>
+      </div>
+      <div class="field" style="margin-bottom:0"><label>Otros costos variables por unidad (ARS)</label><input type="number" id="p-otros" value="0" step="100" min="0" oninput="S.pr.otros=+this.value;R()"></div>
+    </div>
+    <div class="card">
+      <div class="ctitle">Precio y forma de cobro</div>
+      <div class="field"><label>Precio de venta al público (ARS)</label><input type="number" id="p-precio" value="25000" step="500" min="0" oninput="S.pr.precio=+this.value;R()"></div>
+      <div class="field" style="margin-bottom:0"><label>Método de pago principal</label>
+        <div class="tgroup" id="mp-sel">
+          <button class="tbg on" onclick="selMP('1p',this)">1 pago</button>
+          <button class="tbg" onclick="selMP('3c',this)">3 cuotas</button>
+          <button class="tbg" onclick="selMP('6c',this)">6 cuotas</button>
+          <button class="tbg" onclick="selMP('12c',this)">12 cuotas</button>
+          <button class="tbg" onclick="selMP('18c',this)">18 cuotas</button>
+        </div>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="m blue"><div class="m-lbl">Margen bruto</div><div class="m-val" id="p-mb-v">—</div><div class="m-sub">sin CAC ni overhead</div></div>
+      <div class="m blue"><div class="m-lbl">Markup sobre costo</div><div class="m-val" id="p-mk-v">—</div><div class="m-sub">sobre costo del producto</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctitle">Desglose por unidad</div>
+    <table class="dt">
+      <tbody>
+        <tr><td>Precio de venta</td><td class="num pos" style="font-weight:600" id="u-precio">$0</td><td class="pct">100.0%</td></tr>
+        <tr><td class="neu" style="padding-left:18px">— Comisión MP + IVA</td><td class="num neg" id="u-mp">$0</td><td class="pct neg" id="u-mp-p">0.0%</td></tr>
+        <tr><td class="neu" style="padding-left:18px">— IIBB</td><td class="num neg" id="u-iibb">$0</td><td class="pct neg" id="u-iibb-p">0.0%</td></tr>
+        <tr style="border-top:2px solid var(--bdr2)"><td style="font-weight:600">Revenue neto plataforma</td><td class="num" style="font-weight:600" id="u-rn">$0</td><td class="pct" id="u-rn-p">0.0%</td></tr>
+        <tr><td class="neu" style="padding-left:18px">— Costo producto</td><td class="num neg" id="u-cos">$0</td><td class="pct neg" id="u-cos-p">0.0%</td></tr>
+        <tr><td class="neu" style="padding-left:18px">— Packaging</td><td class="num neg" id="u-pk">$0</td><td class="pct neg" id="u-pk-p">0.0%</td></tr>
+        <tr><td class="neu" style="padding-left:18px">— Envío (a cargo vendedor)</td><td class="num neg" id="u-env">$0</td><td class="pct neg" id="u-env-p">0.0%</td></tr>
+        <tr><td class="neu" style="padding-left:18px">— Devoluciones (pérdida neta)</td><td class="num neg" id="u-dev">$0</td><td class="pct neg" id="u-dev-p">0.0%</td></tr>
+        <tr><td class="neu" style="padding-left:18px">— CAC (ads / unidad vendida)</td><td class="num neg" id="u-cac">$0</td><td class="pct neg" id="u-cac-p">0.0%</td></tr>
+        <tr><td class="neu" style="padding-left:18px">— Overhead (fijos / unidad)</td><td class="num neg" id="u-oh">$0</td><td class="pct neg" id="u-oh-p">0.0%</td></tr>
+        <tr id="u-fin-row" class="ok-row"><td style="font-weight:600">GANANCIA NETA / unidad</td><td class="num" style="font-weight:600" id="u-gan">$0</td><td class="pct" style="font-weight:600" id="u-mn">0.0%</td></tr>
+      </tbody>
+    </table>
+    <div class="sep"></div>
+    <div class="cc" style="height:160px"><canvas id="ch-wf" role="img" aria-label="Cascada de costos por unidad"></canvas></div>
+    <div class="wl">
+      <div class="wl-i"><div class="wl-d" style="background:#10b981"></div>Ingresos</div>
+      <div class="wl-i"><div class="wl-d" style="background:#ef4444"></div>Plataforma</div>
+      <div class="wl-i"><div class="wl-d" style="background:#f97316"></div>Costos var.</div>
+      <div class="wl-i"><div class="wl-d" style="background:#2563eb"></div>Neto</div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- TAB 3: MARKETING -->
+<section id="tab-marketing" class="panel">
+<div class="sh"><h2>Marketing &amp; adquisición</h2><p>ROAS, MER, CAC. El costo real de conseguir cada venta, integrado al margen del negocio.</p></div>
+<div class="mgrid" style="margin-bottom:16px">
+  <div class="m blue"><div class="m-lbl">ROAS total</div><div class="m-val" id="m-roas">—</div><div class="m-sub">revenue atribuido / inversión</div></div>
+  <div class="m blue"><div class="m-lbl">MER</div><div class="m-val" id="m-mer">—</div><div class="m-sub">revenue total / inversión total</div></div>
+  <div class="m" id="m-cac-c"><div class="m-lbl">CAC</div><div class="m-val" id="m-cac">—</div><div class="m-sub">costo por cliente adquirido</div></div>
+  <div class="m" id="m-ltv-c"><div class="m-lbl">LTV estimado</div><div class="m-val" id="m-ltv">—</div><div class="m-sub">ticket × frecuencia anual</div></div>
+  <div class="m" id="m-ratio-c"><div class="m-lbl">LTV / CAC</div><div class="m-val" id="m-ratio">—</div><div class="m-sub">≥ 3x es saludable</div></div>
+  <div class="m"><div class="m-lbl">Inversión total</div><div class="m-val" id="m-inv">—</div><div class="m-sub">canales activos / mes</div></div>
+</div>
+<div class="glr">
+  <div class="stack">
+    <div class="card">
+      <div class="ctitle">Canales de publicidad — inversión mensual</div>
+      <table class="dt">
+        <thead><tr><th>Canal</th><th style="width:130px">Inversión (ARS)</th><th style="width:150px">Revenue atribuido</th><th style="width:65px">ROAS</th></tr></thead>
+        <tbody id="ch-tbody"></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="ctitle">Métricas de conversión</div>
+      <div class="g2">
+        <div class="field"><label>Sesiones mensuales al sitio</label><input type="number" id="m-ses" value="1000" step="100" min="0" oninput="S.mkt.sesiones=+this.value;R()"></div>
+        <div class="field"><label>Tasa de conversión (%)</label><input type="number" id="m-conv" value="1.5" step="0.1" min="0" oninput="S.mkt.conversion=+this.value;R()"></div>
+        <div class="field" style="margin-bottom:0"><label>Clientes nuevos / mes</label><input type="number" id="m-nuevos" value="10" step="1" min="0" oninput="S.mkt.nuevos=+this.value;R()"></div>
+        <div class="field" style="margin-bottom:0"><label>Frecuencia de recompra (veces/año)</label><input type="number" id="m-freq" value="1.5" step="0.1" min="0" oninput="S.mkt.frecuencia=+this.value;R()"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ctitle">Simulador de inversión en ads</div>
+      <div class="srow">
+        <div class="slbl-row"><span class="slbl">Variación en inversión ads</span><span class="sval" id="sl-ads-v">+0%</span></div>
+        <input type="range" id="sl-ads" min="-50" max="200" value="0" step="5" oninput="adsSlider(+this.value)">
+      </div>
+      <div class="g2">
+        <div class="m"><div class="m-lbl">Inversión simulada</div><div class="m-val" id="ads-inv" style="font-size:14px">—</div></div>
+        <div class="m"><div class="m-lbl">CAC simulado</div><div class="m-val" id="ads-cac" style="font-size:14px">—</div></div>
+        <div class="m"><div class="m-lbl">Margen neto sim.</div><div class="m-val" id="ads-mn" style="font-size:14px">—</div></div>
+        <div class="m"><div class="m-lbl">ROAS simulado</div><div class="m-val" id="ads-roas" style="font-size:14px">—</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="stack">
+    <div class="card">
+      <div class="ctitle">ROAS por canal</div>
+      <div class="cc" style="height:190px"><canvas id="ch-roas" role="img" aria-label="ROAS por canal de marketing"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ctitle">Distribución de inversión</div>
+      <div class="cc" style="height:170px"><canvas id="ch-invdist" role="img" aria-label="Distribución de inversión por canal"></canvas></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- TAB 4: LOGÍSTICA -->
+<section id="tab-logistica" class="panel">
+<div class="sh"><h2>Logística &amp; devoluciones</h2><p>Costos reales de llevar el producto al cliente. Las devoluciones son uno de los costos más subestimados del ecommerce.</p></div>
+<div class="glr">
+  <div class="stack">
+    <div class="card">
+      <div class="ctitle">Configuración de envío</div>
+      <div class="field">
+        <label>Zona de envío base (zona típica de tus clientes)</label>
+        <select id="l-zona" onchange="S.log.zona=this.value;R()">
+          <option value="amba">AMBA (Capital + GBA)</option>
+          <option value="int_c">Interior cercano (Córdoba, Rosario...)</option>
+          <option value="int_l">Interior lejano (Mendoza, Santa Fe...)</option>
+          <option value="noa">NOA / NEA</option>
+          <option value="pat">Patagonia</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>¿El envío lo absorbés vos (envío gratis)?</label>
+        <div class="tgroup">
+          <button class="tbg on" id="env-si" onclick="S.log.gratis=true;this.classList.add('on');document.getElementById('env-no').classList.remove('on');R()">Sí, yo pago el envío</button>
+          <button class="tbg" id="env-no" onclick="S.log.gratis=false;this.classList.add('on');document.getElementById('env-si').classList.remove('on');R()">El cliente paga</button>
+        </div>
+      </div>
+      <div class="field"><label>Fulfillment tercerizado por unidad (ARS)</label><input type="number" id="l-ff" value="0" step="200" min="0" oninput="S.log.fulfillment=+this.value;R()"></div>
+      <div class="field" style="margin-bottom:0"><label>Seguro de envío por unidad (ARS)</label><input type="number" id="l-seg" value="0" step="100" min="0" oninput="S.log.seguro=+this.value;R()"></div>
+    </div>
+    <div class="card">
+      <div class="ctitle">Devoluciones &amp; reverse logistics</div>
+      <div class="srow">
+        <div class="slbl-row"><span class="slbl">Tasa de devolución</span><span class="sval" id="dev-rate-v">2.0%</span></div>
+        <input type="range" id="sl-dev" min="0" max="20" value="2" step="0.5" oninput="S.log.devRate=+this.value;document.getElementById('dev-rate-v').textContent=this.value+'%';R()">
+      </div>
+      <div class="g2">
+        <div class="field"><label>Costo de reverse logistics (ARS)</label><input type="number" id="l-rev" value="2500" step="100" min="0" oninput="S.log.reversa=+this.value;R()"></div>
+        <div class="field" style="margin-bottom:0"><label>% del producto que recuperás</label><input type="number" id="l-rec" value="70" step="5" min="0" max="100" oninput="S.log.recuperacion=+this.value;R()"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ctitle">Impacto logístico total por unidad</div>
+      <table class="dt">
+        <tbody>
+          <tr><td>Costo de envío (zona seleccionada)</td><td class="num neg" id="lg-env">$0</td></tr>
+          <tr><td>Pérdida neta en devoluciones</td><td class="num neg" id="lg-dev">$0</td></tr>
+          <tr><td>Reverse logistics (proporcional)</td><td class="num neg" id="lg-rev">$0</td></tr>
+          <tr><td>Fulfillment tercerizado</td><td class="num neg" id="lg-ff">$0</td></tr>
+          <tr><td>Seguro de envío</td><td class="num neg" id="lg-seg">$0</td></tr>
+          <tr class="tot"><td>TOTAL logístico / unidad</td><td class="num" id="lg-tot">$0</td></tr>
+        </tbody>
+      </table>
+      <div id="dev-warn" class="warn-box" style="margin-top:10px;display:none">Con tasa de devolución mayor al 5% el impacto en el margen es severo. Revisá fotos, descripción y política de cambios.</div>
+    </div>
+  </div>
+  <div class="stack">
+    <div class="card">
+      <div class="ctitle">Margen neto vs. tasa de devolución</div>
+      <p style="font-size:11px;color:var(--t3);margin-bottom:8px">El punto naranja marca tu tasa actual.</p>
+      <div class="cc" style="height:240px"><canvas id="ch-dev" role="img" aria-label="Impacto de la tasa de devolución en el margen neto"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ctitle">Composición del costo logístico</div>
+      <div class="cc" style="height:170px"><canvas id="ch-logcomp" role="img" aria-label="Composición de costos logísticos"></canvas></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- TAB 5: ESTRUCTURA -->
+<section id="tab-estructura" class="panel">
+<div class="sh"><h2>Estructura operativa</h2><p>Costos fijos del negocio. Se prorratean por unidad: a mayor volumen, menor costo fijo por venta.</p></div>
+<div class="glr">
+  <div class="stack">
+    <div class="card">
+      <div class="ctitle">Costos fijos mensuales</div>
+      <table class="dt">
+        <thead><tr><th>Concepto</th><th style="width:200px">Monto / mes (ARS)</th></tr></thead>
+        <tbody>
+          <tr><td>Sueldos y honorarios</td><td><input class="ci" type="number" id="e-sue" value="0" step="5000" min="0" oninput="S.est.sueldos=+this.value;R()"></td></tr>
+          <tr><td>Alquiler / depósito</td><td><input class="ci" type="number" id="e-alq" value="0" step="5000" min="0" oninput="S.est.alquiler=+this.value;R()"></td></tr>
+          <tr><td>Herramientas SaaS y apps</td><td><input class="ci" type="number" id="e-her" value="2000" step="500" min="0" oninput="S.est.herramientas=+this.value;R()"></td></tr>
+          <tr><td>Contaduría / asesoría legal</td><td><input class="ci" type="number" id="e-con" value="8000" step="500" min="0" oninput="S.est.contaduria=+this.value;R()"></td></tr>
+          <tr><td>Mantenimiento web / dominio</td><td><input class="ci" type="number" id="e-web" value="3000" step="500" min="0" oninput="S.est.web=+this.value;R()"></td></tr>
+          <tr><td>Servicios (internet, telefonía)</td><td><input class="ci" type="number" id="e-srv" value="0" step="500" min="0" oninput="S.est.servicios=+this.value;R()"></td></tr>
+          <tr><td>Tiendanube (del módulo config)</td><td class="num" id="e-tn">$0</td></tr>
+          <tr><td>Otros gastos fijos</td><td><input class="ci" type="number" id="e-otr" value="0" step="1000" min="0" oninput="S.est.otros=+this.value;R()"></td></tr>
+        </tbody>
+        <tfoot><tr class="tot"><td>TOTAL costos fijos / mes</td><td class="num" id="e-tot">$0</td></tr></tfoot>
+      </table>
+    </div>
+    <div class="card">
+      <div class="ctitle">Volumen de ventas</div>
+      <div class="field"><label>Unidades vendidas por mes</label><input type="number" id="e-ud" value="30" step="5" min="1" oninput="S.est.unidades=+this.value;R()"></div>
+      <div class="g2">
+        <div class="m blue"><div class="m-lbl">Overhead / unidad</div><div class="m-val" id="e-oh-v">$0</div><div class="m-sub">costo fijo prorrateado</div></div>
+        <div class="m"><div class="m-lbl">% del precio de venta</div><div class="m-val" id="e-oh-p">0.0%</div><div class="m-sub" id="e-ud-ref">a 30 uds/mes</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="stack">
+    <div class="card">
+      <div class="ctitle">Dilución del overhead con el volumen</div>
+      <p style="font-size:11px;color:var(--t3);margin-bottom:8px">El punto naranja es tu volumen actual. Mayor volumen = menor peso fijo por unidad.</p>
+      <div class="cc" style="height:240px"><canvas id="ch-dil" role="img" aria-label="Dilución del overhead según volumen"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ctitle">Composición de costos fijos</div>
+      <div class="cc" style="height:190px"><canvas id="ch-ohcomp" role="img" aria-label="Composición de costos fijos"></canvas></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- TAB 6: DASHBOARD -->
+<section id="tab-dashboard" class="panel">
+<div class="sh"><h2>Dashboard P&amp;L mensual</h2><p>Estado de resultados completo con todos los módulos integrados.</p></div>
+<div class="g4" style="margin-bottom:16px">
+  <div class="m" id="d-mg"><div class="m-lbl">Margen bruto</div><div class="m-val" id="d-mg-v">—</div><div class="m-sub" id="d-mg-s">—</div></div>
+  <div class="m" id="d-mn"><div class="m-lbl">Margen neto</div><div class="m-val" id="d-mn-v">—</div><div class="m-sub" id="d-mn-s">—</div></div>
+  <div class="m" id="d-ebitda"><div class="m-lbl">EBITDA mensual</div><div class="m-val" id="d-ebitda-v">—</div><div class="m-sub" id="d-ebitda-s">—</div></div>
+  <div class="m" id="d-be"><div class="m-lbl">Break-even</div><div class="m-val" id="d-be-v">—</div><div class="m-sub">uds. para cubrir todos los costos</div></div>
+</div>
+<div class="g2" style="margin-bottom:16px">
+  <div class="card">
+    <div class="ctitle">Estado de resultados mensual</div>
+    <table class="dt">
+      <thead><tr><th>Concepto</th><th style="text-align:right">ARS / mes</th><th style="text-align:right;width:70px">% rev.</th></tr></thead>
+      <tbody>
+        <tr><td style="font-weight:600">Revenue bruto</td><td class="num pos" style="font-weight:600" id="pl-rb">$0</td><td class="pct">100%</td></tr>
+        <tr><td style="padding-left:14px;color:var(--t2)">— Devoluciones</td><td class="num neg" id="pl-dev">$0</td><td class="pct neg" id="pl-dev-p">0%</td></tr>
+        <tr class="tot"><td>Revenue neto</td><td class="num" id="pl-rn">$0</td><td class="pct" id="pl-rn-p">0%</td></tr>
+        <tr><td style="padding-left:14px;color:var(--t2)">— Costo de mercadería (CMV)</td><td class="num neg" id="pl-cmv">$0</td><td class="pct neg" id="pl-cmv-p">0%</td></tr>
+        <tr><td style="padding-left:14px;color:var(--t2)">— Packaging</td><td class="num neg" id="pl-pk">$0</td><td class="pct neg" id="pl-pk-p">0%</td></tr>
+        <tr class="tot"><td style="font-weight:600">Margen bruto</td><td class="num" style="font-weight:600" id="pl-mb">$0</td><td class="pct" style="font-weight:600" id="pl-mb-p">0%</td></tr>
+        <tr><td style="padding-left:14px;color:var(--t2)">— Comisiones MP + IVA</td><td class="num neg" id="pl-mp">$0</td><td class="pct neg" id="pl-mp-p">0%</td></tr>
+        <tr><td style="padding-left:14px;color:var(--t2)">— IIBB</td><td class="num neg" id="pl-iibb">$0</td><td class="pct neg" id="pl-iibb-p">0%</td></tr>
+        <tr><td style="padding-left:14px;color:var(--t2)">— Logística total</td><td class="num neg" id="pl-log">$0</td><td class="pct neg" id="pl-log-p">0%</td></tr>
+        <tr><td style="padding-left:14px;color:var(--t2)">— Marketing / ads</td><td class="num neg" id="pl-mkt">$0</td><td class="pct neg" id="pl-mkt-p">0%</td></tr>
+        <tr class="tot"><td style="font-weight:600">Contribución marginal</td><td class="num" style="font-weight:600" id="pl-cm">$0</td><td class="pct" style="font-weight:600" id="pl-cm-p">0%</td></tr>
+        <tr><td style="padding-left:14px;color:var(--t2)">— Costos fijos totales</td><td class="num neg" id="pl-fij">$0</td><td class="pct neg" id="pl-fij-p">0%</td></tr>
+        <tr id="pl-fin-row" class="ok-row"><td style="font-weight:600">RESULTADO NETO (EBITDA)</td><td class="num" style="font-weight:600" id="pl-ebitda">$0</td><td class="pct" style="font-weight:600" id="pl-ebitda-p">0%</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:10px;font-size:11px;color:var(--t2)">Break-even: <strong id="be-txt1">—</strong> unidades = <strong id="be-txt2">—</strong> de revenue mensual</div>
+  </div>
+  <div class="card">
+    <div class="ctitle">Cascada P&amp;L mensual (waterfall)</div>
+    <div class="cc" style="height:340px"><canvas id="ch-wfpl" role="img" aria-label="Cascada de ingresos y costos mensual"></canvas></div>
+  </div>
+</div>
+<div class="g2">
+  <div class="card">
+    <div class="ctitle">Composición de costos (% precio de venta)</div>
+    <div class="cc" style="height:270px"><canvas id="ch-donut" role="img" aria-label="Composición de costos como porcentaje del precio de venta"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="ctitle">Break-even — ganancia neta vs. unidades vendidas</div>
+    <p style="font-size:11px;color:var(--t3);margin-bottom:8px">El punto naranja es tu volumen actual. Cruzar el cero = break-even.</p>
+    <div class="cc" style="height:240px"><canvas id="ch-be" role="img" aria-label="Break-even en unidades vendidas"></canvas></div>
+  </div>
+</div>
+</section>
+
+<!-- TAB 7: ESCENARIOS -->
+<section id="tab-escenarios" class="panel">
+<div class="sh"><h2>Simulador de escenarios</h2><p>Mové los sliders para ver en tiempo real cómo cada variable impacta el margen y el negocio.</p></div>
+<div class="glr">
+  <div class="stack">
+    <div class="card">
+      <div class="ctitle">Variables a simular</div>
+      <div class="srow"><div class="slbl-row"><span class="slbl">Cambio en precio de venta</span><span class="sval" id="sv-pr">+0%</span></div><input type="range" id="ss-pr" min="-30" max="50" value="0" step="1" oninput="simR()"></div>
+      <div class="srow"><div class="slbl-row"><span class="slbl">Cambio en costo del producto</span><span class="sval" id="sv-co">+0%</span></div><input type="range" id="ss-co" min="-20" max="80" value="0" step="1" oninput="simR()"></div>
+      <div class="srow"><div class="slbl-row"><span class="slbl">Cambio en inversión publicitaria</span><span class="sval" id="sv-ad">+0%</span></div><input type="range" id="ss-ad" min="-50" max="200" value="0" step="5" oninput="simR()"></div>
+      <div class="srow"><div class="slbl-row"><span class="slbl">Cambio en tasa de conversión</span><span class="sval" id="sv-cv">+0%</span></div><input type="range" id="ss-cv" min="-50" max="100" value="0" step="5" oninput="simR()"></div>
+      <div class="srow"><div class="slbl-row"><span class="slbl">Devaluación USD/ARS</span><span class="sval" id="sv-ud">+0%</span></div><input type="range" id="ss-ud" min="0" max="100" value="0" step="5" oninput="simR()"></div>
+      <div class="srow" style="margin-bottom:0"><div class="slbl-row"><span class="slbl">Cambio en volumen de ventas</span><span class="sval" id="sv-vl">+0%</span></div><input type="range" id="ss-vl" min="-50" max="200" value="0" step="5" oninput="simR()"></div>
+      <div class="sep"></div>
+      <button onclick="resetSim()" style="padding:7px 14px;background:var(--bg);border:1px solid var(--bdr);border-radius:var(--r);font-size:11px;cursor:pointer;font-family:inherit;color:var(--t2)">Resetear escenario</button>
+    </div>
+    <div class="card">
+      <div class="ctitle">Resultado del escenario</div>
+      <div class="g2">
+        <div>
+          <div style="margin-bottom:12px"><div class="m-lbl">Precio simulado</div><div style="font-size:13px;font-family:'Courier New',monospace" id="sc-pr">—</div></div>
+          <div style="margin-bottom:12px"><div class="m-lbl">Costo simulado</div><div style="font-size:13px;font-family:'Courier New',monospace" id="sc-co">—</div></div>
+          <div><div class="m-lbl">Unidades simuladas</div><div style="font-size:13px;font-family:'Courier New',monospace" id="sc-vol">—</div></div>
+        </div>
+        <div>
+          <div style="margin-bottom:8px"><div class="m-lbl">Margen actual</div><div style="font-size:13px;font-family:'Courier New',monospace" id="sc-mn-actual">—</div></div>
+          <div style="margin-bottom:8px"><div class="m-lbl">Margen simulado</div><div style="font-size:26px;font-weight:600;font-family:'Courier New',monospace" id="sc-mn-sim">—</div></div>
+          <div><div class="m-lbl">Variación</div><div style="font-size:16px;font-weight:600;font-family:'Courier New',monospace" id="sc-delta">—</div></div>
+        </div>
+      </div>
+      <div class="sep"></div>
+      <div style="font-size:12px;color:var(--t2);line-height:1.6" id="sc-insight">Ajustá los sliders para ver el impacto en tiempo real.</div>
+    </div>
+  </div>
+  <div class="stack">
+    <div class="card">
+      <div class="ctitle">Análisis de sensibilidad del margen neto</div>
+      <p style="font-size:11px;color:var(--t3);margin-bottom:8px">Muestra cómo varía el margen neto al cambiar precio, costo o inversión en ads.</p>
+      <div class="cc" style="height:240px"><canvas id="ch-sens" role="img" aria-label="Sensibilidad del margen neto"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ctitle">Comparativa: base vs. escenario simulado</div>
+      <div class="cc" style="height:220px"><canvas id="ch-comp" role="img" aria-label="Comparativa de métricas base vs escenario"></canvas></div>
+    </div>
+  </div>
+</div>
+</section>
+
+</main>
+
+<script>
+// ============================================================
+// ESTADO GLOBAL
+// ============================================================
+const S = {
+  cfg: {
+    mp: {'1p':2.99,'3c':5.99,'6c':9.99,'12c':13.99,'18c':17.99},
+    iibb: 3, iva: 21, tiendanube: 15999, usd: 1180,
+    zonas: {amba:2800,int_c:3800,int_l:5200,noa:7500,pat:9000}
+  },
+  pr:  {nombre:'Mi Producto',costo:10000,moneda:'ARS',packaging:400,foto:0,otros:0,precio:25000,mpKey:'1p'},
+  mkt: {
+    canales:[
+      {nombre:'Meta Ads',inv:30000,rev:90000},
+      {nombre:'Google Ads',inv:20000,rev:55000},
+      {nombre:'TikTok Ads',inv:0,rev:0},
+      {nombre:'Influencers',inv:0,rev:0},
+    ],
+    sesiones:1000, conversion:1.5, nuevos:10, frecuencia:1.5
+  },
+  log: {zona:'amba',gratis:true,devRate:2,reversa:2500,recuperacion:70,fulfillment:0,seguro:0},
+  est: {sueldos:0,alquiler:0,herramientas:2000,contaduria:8000,web:3000,servicios:0,otros:0,unidades:30}
+};
+
+// ============================================================
+// HELPERS
+// ============================================================
+const $ = id => document.getElementById(id);
+const fmt = v => {
+  const n = Math.abs(v);
+  const s = n >= 1000000 ? '$' + (n/1000000).toFixed(1) + 'M' :
+            n >= 1000    ? '$' + Math.round(n).toLocaleString('es-AR') : '$' + Math.round(n);
+  return v < 0 ? '-' + s : s;
+};
+const fp = v => (v>=0?'+':'')+v.toFixed(1)+'%';
+const fp2 = v => v.toFixed(1)+'%';
+const colMn = m => m >= 25 ? '#059669' : m >= 15 ? '#d97706' : '#dc2626';
+const colBg = m => m >= 25 ? '#ecfdf5' : m >= 15 ? '#fffbeb' : '#fef2f2';
+const colClass = m => m >= 25 ? 'green' : m >= 15 ? 'amber' : 'red';
+
+// Charts registry
+const charts = {};
+function mkChart(id, cfg) {
+  if(charts[id]) charts[id].destroy();
+  const ctx = $(id);
+  if(!ctx) return null;
+  charts[id] = new Chart(ctx, cfg);
+  return charts[id];
+}
+
+// ============================================================
+// CÁLCULO CENTRAL
+// ============================================================
+function calc() {
+  const {cfg,pr,mkt,log,est} = S;
+
+  // --- Costo en ARS ---
+  const costoARS = pr.moneda === 'USD' ? pr.costo * cfg.usd : pr.costo;
+
+  // --- Comisión MP ---
+  const mpRate = cfg.mp[pr.mpKey] / 100;
+  const mpCost = pr.precio * mpRate * (1 + cfg.iva/100);
+
+  // --- IIBB ---
+  const iibbCost = pr.precio * cfg.iibb / 100;
+
+  // --- Revenue neto plataforma ---
+  const revNeto = pr.precio - mpCost - iibbCost;
+
+  // --- Costos variables producto ---
+  const totalProdVar = costoARS + pr.packaging + pr.foto + pr.otros;
+
+  // --- Margen bruto por unidad ---
+  const margenBrutoUnit = revNeto - totalProdVar;
+  const margenBrutoPct = pr.precio > 0 ? (margenBrutoUnit / pr.precio) * 100 : 0;
+
+  // --- Logística ---
+  const costoEnvio = log.gratis ? cfg.zonas[log.zona] : 0;
+  const perdidaDev = (log.devRate/100) * (costoARS * (1 - log.recuperacion/100));
+  const reversaCost = (log.devRate/100) * log.reversa;
+  const totalLog = costoEnvio + perdidaDev + reversaCost + log.fulfillment + log.seguro;
+
+  // --- Marketing / CAC ---
+  const totalInv = mkt.canales.reduce((a,c) => a + c.inv, 0);
+  const totalRevAtrib = mkt.canales.reduce((a,c) => a + c.rev, 0);
+  const unidadesVendidas = est.unidades;
+  const cacUnit = unidadesVendidas > 0 ? totalInv / unidadesVendidas : 0;
+
+  // --- Overhead ---
+  const totalFijos = est.sueldos + est.alquiler + est.herramientas + est.contaduria + est.web + est.servicios + cfg.tiendanube + est.otros;
+  const ohUnit = unidadesVendidas > 0 ? totalFijos / unidadesVendidas : 0;
+
+  // --- Margen neto por unidad ---
+  const gananciaUnit = margenBrutoUnit - totalLog - cacUnit - ohUnit;
+  const margenNetoPct = pr.precio > 0 ? (gananciaUnit / pr.precio) * 100 : 0;
+  const markup = costoARS > 0 ? ((pr.precio - costoARS) / costoARS) * 100 : 0;
+
+  // --- P&L Mensual ---
+  const revBruto = pr.precio * unidadesVendidas;
+  const devTotal = (log.devRate/100) * revBruto;
+  const revNetoMes = revBruto - devTotal;
+  const cmvTotal = costoARS * unidadesVendidas;
+  const pkgTotal = pr.packaging * unidadesVendidas;
+  const margenBrutoMes = revNetoMes - cmvTotal - pkgTotal;
+  const mpTotal = mpCost * unidadesVendidas;
+  const iibbTotal = iibbCost * unidadesVendidas;
+  const logTotal = totalLog * unidadesVendidas;
+  const mktTotal = totalInv;
+  const contribucion = margenBrutoMes - mpTotal - iibbTotal - logTotal - mktTotal;
+  const ebitda = contribucion - totalFijos;
+  const margenNetoMes = revBruto > 0 ? (ebitda / revBruto) * 100 : 0;
+  const margenBrutoMesPct = revBruto > 0 ? (margenBrutoMes / revBruto) * 100 : 0;
+
+  // --- Break-even ---
+  const precioMp = pr.precio - mpCost - iibbCost - costoARS - pr.packaging - costoEnvio - (perdidaDev + reversaCost + log.fulfillment + log.seguro) - cacUnit;
+  const be = precioMp > 0 ? Math.ceil(totalFijos / precioMp) : Infinity;
+
+  // --- KPIs Marketing ---
+  const roas = totalInv > 0 ? totalRevAtrib / totalInv : 0;
+  const mer  = totalInv > 0 ? revBruto / totalInv : 0;
+  const ltv  = pr.precio * mkt.frecuencia;
+  const ltvCacRatio = cacUnit > 0 ? ltv / cacUnit : 0;
+
+  return {
+    costoARS, mpCost, iibbCost, revNeto, totalProdVar,
+    margenBrutoUnit, margenBrutoPct,
+    costoEnvio, perdidaDev, reversaCost, totalLog,
+    cacUnit, ohUnit, totalFijos, totalInv,
+    gananciaUnit, margenNetoPct, markup,
+    revBruto, devTotal, revNetoMes, cmvTotal, pkgTotal,
+    margenBrutoMes, margenBrutoMesPct,
+    mpTotal, iibbTotal, logTotal, mktTotal,
+    contribucion, ebitda, margenNetoMes,
+    be, roas, mer, ltv, ltvCacRatio, cacUnit,
+    totalRevAtrib, unidadesVendidas
+  };
+}
+
+// ============================================================
+// RENDER PRINCIPAL
+// ============================================================
+function R() {
+  const d = calc();
+  updateHeader(d);
+  updateProducto(d);
+  updateMarketing(d);
+  updateLogistica(d);
+  updateEstructura(d);
+  updateDashboard(d);
+  updateEscenarios(d);
+}
+
+// --- Header chips ---
+function updateHeader(d) {
+  const setChip = (id, val, cls) => {
+    $(id).className = 'chip ' + cls;
+    $(id).querySelector('.chip-val').textContent = val;
+  };
+  const mn = d.margenNetoPct;
+  setChip('chip-mn', fp2(mn), colClass(mn));
+  const mb = d.margenBrutoPct;
+  setChip('chip-mb', fp2(mb), mb>=35?'ok':mb>=20?'warn':'bad');
+  setChip('chip-roas', d.roas.toFixed(1)+'x', d.roas>=3?'ok':d.roas>=2?'warn':'bad');
+  setChip('chip-cac', fmt(d.cacUnit), '');
+  setChip('chip-be', d.be===Infinity?'∞':d.be+'u', d.be<=d.unidadesVendidas?'ok':'warn');
+  $('cv-mn').style.color = colMn(mn);
+  $('cv-mb').style.color = mb>=35?'#34d399':mb>=20?'#fbbf24':'#f87171';
+}
+
+// --- Producto ---
+function updateProducto(d) {
+  const p = d;
+  const set = (id, v) => { const e=$(id); if(e) e.textContent=v; };
+  const setNeg = (id, v) => { const e=$(id); if(e){e.textContent=v;e.className='num neg';} };
+  const setPct = (id, v) => { const e=$(id); if(e) e.textContent=v; };
+
+  set('u-precio', fmt(S.pr.precio));
+  setNeg('u-mp', '-'+fmt(p.mpCost));
+  setPct('u-mp-p', '-'+fp2(p.mpCost/S.pr.precio*100));
+  setNeg('u-iibb', '-'+fmt(p.iibbCost));
+  setPct('u-iibb-p', '-'+fp2(S.cfg.iibb));
+  set('u-rn', fmt(p.revNeto));
+  setPct('u-rn-p', fp2(p.revNeto/S.pr.precio*100));
+  setNeg('u-cos', '-'+fmt(p.costoARS));
+  setPct('u-cos-p', '-'+fp2(p.costoARS/S.pr.precio*100));
+  setNeg('u-pk', '-'+fmt(S.pr.packaging));
+  setPct('u-pk-p', '-'+fp2(S.pr.packaging/S.pr.precio*100));
+  setNeg('u-env', '-'+fmt(p.costoEnvio));
+  setPct('u-env-p', '-'+fp2(p.costoEnvio/S.pr.precio*100));
+  setNeg('u-dev', '-'+fmt(p.perdidaDev+p.reversaCost));
+  setPct('u-dev-p', '-'+fp2((p.perdidaDev+p.reversaCost)/S.pr.precio*100));
+  setNeg('u-cac', '-'+fmt(p.cacUnit));
+  setPct('u-cac-p', '-'+fp2(p.cacUnit/S.pr.precio*100));
+  setNeg('u-oh', '-'+fmt(p.ohUnit));
+  setPct('u-oh-p', '-'+fp2(p.ohUnit/S.pr.precio*100));
+
+  const ganRow = $('u-fin-row');
+  const mn = p.margenNetoPct;
+  ganRow.className = mn >= 0 ? 'ok-row' : 'bad-row';
+  set('u-gan', fmt(p.gananciaUnit));
+  set('u-mn', fp2(mn));
+
+  $('p-mb-v').textContent = fp2(p.margenBrutoPct);
+  $('p-mb-v').parentElement.className = 'm ' + colClass(p.margenBrutoPct);
+  $('p-mk-v').textContent = fp2(p.markup) + '%';
+
+  drawWaterfall(d);
+}
+
+function drawWaterfall(d) {
+  const pr = S.pr.precio;
+  const items = [
+    {l:'Precio',v:pr,t:'in'},
+    {l:'MP+IVA',v:-d.mpCost,t:'out'},
+    {l:'IIBB',v:-d.iibbCost,t:'out'},
+    {l:'Costo',v:-d.costoARS,t:'out'},
+    {l:'Pkg',v:-S.pr.packaging,t:'out'},
+    {l:'Envío',v:-d.costoEnvio,t:'out'},
+    {l:'Dev.',v:-(d.perdidaDev+d.reversaCost),t:'out'},
+    {l:'CAC',v:-d.cacUnit,t:'out'},
+    {l:'OH',v:-d.ohUnit,t:'out'},
+    {l:'Neto',v:d.gananciaUnit,t:'net'},
+  ];
+  let running = 0;
+  const starts=[], ends=[], colors=[], labels=[], vals=[];
+  items.forEach(item => {
+    if(item.t==='in') { starts.push(0); ends.push(item.v); colors.push('#10b981'); }
+    else if(item.t==='out') { const s=Math.max(0,running+item.v); starts.push(s); ends.push(Math.abs(item.v)); colors.push('#ef4444'); }
+    else { starts.push(0); ends.push(Math.max(0,item.v)); colors.push(item.v>=0?'#2563eb':'#dc2626'); }
+    if(item.t!=='net') running += item.v;
+    labels.push(item.l); vals.push(Math.abs(item.v));
+  });
+  mkChart('ch-wf',{type:'bar',data:{labels,datasets:[
+    {data:starts,backgroundColor:'transparent',borderWidth:0,stack:'s'},
+    {data:ends,backgroundColor:colors,borderRadius:3,stack:'s'},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.datasetIndex===1?fmt(vals[ctx.dataIndex]):''},filter:i=>i.datasetIndex===1}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,ticks:{callback:v=>fmt(v),font:{size:10}},grid:{color:'#f1f5f9'}}}}});
+}
+
+// --- Marketing ---
+function buildMarketingTable() {
+  const tbody = $('ch-tbody');
+  if(!tbody) return;
+  tbody.innerHTML = S.mkt.canales.map((c,i) => `
+    <tr>
+      <td>${c.nombre}</td>
+      <td><input class="ci" type="number" value="${c.inv}" step="5000" min="0" oninput="S.mkt.canales[${i}].inv=+this.value;R()"></td>
+      <td><input class="ci" type="number" value="${c.rev}" step="5000" min="0" oninput="S.mkt.canales[${i}].rev=+this.value;R()"></td>
+      <td class="num" id="roas-${i}">—</td>
+    </tr>`).join('');
+}
+
+function updateMarketing(d) {
+  S.mkt.canales.forEach((c,i) => {
+    const el = $('roas-'+i);
+    if(el) el.textContent = c.inv > 0 ? (c.rev/c.inv).toFixed(1)+'x' : '—';
+  });
+  const set = (id,v)=>{ const e=$(id);if(e)e.textContent=v; };
+  const setM = (id,v,cls)=>{ const e=$(id);if(e){e.textContent=v;e.parentElement.className='m '+(cls||'');} };
+  set('m-roas', d.roas.toFixed(2)+'x');
+  set('m-mer', d.mer.toFixed(2)+'x');
+  setM('m-cac', fmt(d.cacUnit), d.cacUnit < S.pr.precio*0.2?'green':d.cacUnit < S.pr.precio*0.35?'amber':'red');
+  setM('m-ltv', fmt(d.ltv), 'blue');
+  setM('m-ratio', d.ltvCacRatio.toFixed(1)+'x', d.ltvCacRatio>=3?'green':d.ltvCacRatio>=1.5?'amber':'red');
+  set('m-inv', fmt(d.totalInv));
+  drawROASChart(d);
+  drawInvDistChart(d);
+  adsSlider(+($('sl-ads')?$('sl-ads').value:0));
+}
+
+function drawROASChart(d) {
+  const activos = S.mkt.canales.filter(c=>c.inv>0);
+  if(!activos.length) return;
+  const roasVals = activos.map(c=>+(c.rev/c.inv).toFixed(2));
+  const colors = roasVals.map(v => v>=3?'#10b981':v>=2?'#d97706':'#ef4444');
+  mkChart('ch-roas',{type:'bar',data:{labels:activos.map(c=>c.nombre),datasets:[{label:'ROAS',data:roasVals,backgroundColor:colors,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.raw.toFixed(2)+'x'}}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{beginAtZero:true,ticks:{callback:v=>v+'x',font:{size:10}},grid:{color:'#f1f5f9'}}}}});
+}
+
+function drawInvDistChart(d) {
+  const activos = S.mkt.canales.filter(c=>c.inv>0);
+  if(!activos.length) return;
+  const clrs = ['#2563eb','#10b981','#f97316','#8b5cf6'];
+  mkChart('ch-invdist',{type:'doughnut',data:{labels:activos.map(c=>c.nombre),datasets:[{data:activos.map(c=>c.inv),backgroundColor:clrs,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:10,padding:8}},tooltip:{callbacks:{label:c=>c.label+': '+fmt(c.raw)}}},cutout:'60%'}});
+}
+
+function adsSlider(pct) {
+  const el = $('sl-ads-v'); if(el) el.textContent = (pct>=0?'+':'')+pct+'%';
+  const factor = 1 + pct/100;
+  const d = calc();
+  const simInv = d.totalInv * factor;
+  const simCac = S.est.unidades > 0 ? simInv / S.est.unidades : 0;
+  const simMn = d.margenNetoPct - ((simCac - d.cacUnit) / S.pr.precio * 100);
+  const simRoas = simInv > 0 ? d.totalRevAtrib / simInv : 0;
+  const set=(id,v)=>{const e=$(id);if(e)e.textContent=v;};
+  set('ads-inv', fmt(simInv));
+  set('ads-cac', fmt(simCac));
+  set('ads-mn', fp2(simMn));
+  set('ads-roas', simRoas.toFixed(2)+'x');
+}
+
+// --- Logística ---
+function updateLogistica(d) {
+  const set=(id,v)=>{const e=$(id);if(e)e.textContent=v;};
+  set('lg-env', '-'+fmt(d.costoEnvio));
+  set('lg-dev', '-'+fmt(d.perdidaDev));
+  set('lg-rev', '-'+fmt(d.reversaCost));
+  set('lg-ff',  '-'+fmt(S.log.fulfillment));
+  set('lg-seg', '-'+fmt(S.log.seguro));
+  set('lg-tot', '-'+fmt(d.totalLog));
+  const warn = $('dev-warn');
+  if(warn) warn.style.display = S.log.devRate > 5 ? '' : 'none';
+  drawDevChart(d);
+  drawLogCompChart(d);
+}
+
+function drawDevChart(d) {
+  const pts = 21, step = 20/20;
+  const labels=[], data=[];
+  for(let i=0;i<pts;i++) {
+    const rate = i * step;
+    const dev = (rate/100) * (d.costoARS * (1 - S.log.recuperacion/100));
+    const rev2 = (rate/100) * S.log.reversa;
+    const ganUnit = d.margenBrutoUnit - d.costoEnvio - dev - rev2 - d.log_ff - d.log_seg - d.cacUnit - d.ohUnit;
+    const mn = S.pr.precio > 0 ? (ganUnit/S.pr.precio)*100 : 0;
+    labels.push(rate.toFixed(1)+'%');
+    data.push(+mn.toFixed(1));
+  }
+  const currentIdx = Math.round(S.log.devRate / step);
+  const pointColors = data.map((_,i) => i===currentIdx?'#f97316':'transparent');
+  const pointRadius = data.map((_,i) => i===currentIdx?6:0);
+  mkChart('ch-dev',{type:'line',data:{labels,datasets:[{data,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,.1)',fill:true,pointBackgroundColor:pointColors,pointRadius,tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fp2(c.raw)}}},scales:{x:{ticks:{maxTicksLimit:6,font:{size:10}},grid:{display:false}},y:{ticks:{callback:v=>v+'%',font:{size:10}},grid:{color:'#f1f5f9'}}}}});
+}
+
+function drawLogCompChart(d) {
+  const items = [
+    {l:'Envío',v:d.costoEnvio},{l:'Dev.',v:d.perdidaDev},
+    {l:'Reversa',v:d.reversaCost},{l:'Fulfillment',v:S.log.fulfillment},{l:'Seguro',v:S.log.seguro}
+  ].filter(i=>i.v>0);
+  if(!items.length) return;
+  mkChart('ch-logcomp',{type:'bar',data:{labels:items.map(i=>i.l),datasets:[{data:items.map(i=>i.v),backgroundColor:['#ef4444','#f97316','#fbbf24','#8b5cf6','#10b981'],borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.raw)}}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{ticks:{callback:v=>fmt(v),font:{size:10}},grid:{color:'#f1f5f9'}}}}});
+}
+
+// --- Estructura ---
+function updateEstructura(d) {
+  $('e-tn').textContent = fmt(S.cfg.tiendanube);
+  $('e-tot').textContent = fmt(d.totalFijos);
+  $('e-oh-v').textContent = fmt(d.ohUnit);
+  $('e-oh-p').textContent = fp2(d.ohUnit / (S.pr.precio||1) * 100);
+  $('e-ud-ref').textContent = 'a ' + S.est.unidades + ' uds/mes';
+  drawDilChart(d);
+  drawOhCompChart(d);
+}
+
+function drawDilChart(d) {
+  const max = Math.max(S.est.unidades * 4, 200);
+  const pts = 30;
+  const labels=[], data=[];
+  for(let i=1;i<=pts;i++) {
+    const u = Math.round((max/pts)*i);
+    labels.push(u);
+    data.push(+(d.totalFijos/u).toFixed(0));
+  }
+  const currentU = S.est.unidades;
+  const currentOh = d.totalFijos / currentU;
+  const pointColors = data.map((_,i) => {
+    const u = Math.round((max/pts)*(i+1));
+    return Math.abs(u-currentU) < max/pts/2 ? '#f97316':'transparent';
+  });
+  const pointRadius = pointColors.map(c=>c!=='transparent'?6:0);
+  mkChart('ch-dil',{type:'line',data:{labels,datasets:[{data,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,.08)',fill:true,pointBackgroundColor:pointColors,pointRadius,tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.raw)+' / ud'}}},scales:{x:{ticks:{maxTicksLimit:8,font:{size:10}},grid:{display:false},title:{display:true,text:'Unidades/mes',font:{size:10}}},y:{ticks:{callback:v=>fmt(v),font:{size:10}},grid:{color:'#f1f5f9'},title:{display:true,text:'OH/ud (ARS)',font:{size:10}}}}}});
+}
+
+function drawOhCompChart(d) {
+  const items = [
+    {l:'Sueldos',v:S.est.sueldos},{l:'Alquiler',v:S.est.alquiler},
+    {l:'Herramientas',v:S.est.herramientas},{l:'Contaduría',v:S.est.contaduria},
+    {l:'Web',v:S.est.web},{l:'Servicios',v:S.est.servicios},
+    {l:'Tiendanube',v:S.cfg.tiendanube},{l:'Otros',v:S.est.otros}
+  ].filter(i=>i.v>0);
+  if(!items.length) return;
+  const clrs=['#2563eb','#10b981','#f97316','#8b5cf6','#ef4444','#06b6d4','#fbbf24','#94a3b8'];
+  mkChart('ch-ohcomp',{type:'doughnut',data:{labels:items.map(i=>i.l),datasets:[{data:items.map(i=>i.v),backgroundColor:clrs,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:10,padding:6}},tooltip:{callbacks:{label:c=>c.label+': '+fmt(c.raw)}}},cutout:'55%'}});
+}
+
+// --- Dashboard ---
+function updateDashboard(d) {
+  const set=(id,v)=>{const e=$(id);if(e)e.textContent=v;};
+  const pct=(v,rb)=>rb>0?fp2(v/rb*100):'0%';
+
+  const mn=d.margenNetoMes, mb=d.margenBrutoMesPct;
+  $('d-mg').className='m '+colClass(mb);
+  set('d-mg-v', fp2(mb));
+  set('d-mg-s', fmt(d.margenBrutoMes)+' / mes');
+  $('d-mn').className='m '+colClass(mn);
+  set('d-mn-v', fp2(mn));
+  set('d-mn-s', fmt(d.ebitda)+' / mes');
+  $('d-ebitda').className='m '+(d.ebitda>=0?'green':'red');
+  set('d-ebitda-v', fmt(d.ebitda));
+  set('d-ebitda-s', d.ebitda>=0?'positivo':'negativo');
+  $('d-be').className='m '+(d.be<=d.unidadesVendidas?'green':'amber');
+  set('d-be-v', d.be===Infinity?'∞':d.be+'u');
+
+  set('pl-rb',  fmt(d.revBruto));
+  set('pl-dev', '-'+fmt(d.devTotal));
+  set('pl-dev-p', '-'+pct(d.devTotal,d.revBruto));
+  set('pl-rn',  fmt(d.revNetoMes));
+  set('pl-rn-p', pct(d.revNetoMes,d.revBruto));
+  set('pl-cmv', '-'+fmt(d.cmvTotal));
+  set('pl-cmv-p', '-'+pct(d.cmvTotal,d.revBruto));
+  set('pl-pk',  '-'+fmt(d.pkgTotal));
+  set('pl-pk-p', '-'+pct(d.pkgTotal,d.revBruto));
+  set('pl-mb',  fmt(d.margenBrutoMes));
+  set('pl-mb-p', pct(d.margenBrutoMes,d.revBruto));
+  set('pl-mp',  '-'+fmt(d.mpTotal));
+  set('pl-mp-p','-'+pct(d.mpTotal,d.revBruto));
+  set('pl-iibb','-'+fmt(d.iibbTotal));
+  set('pl-iibb-p','-'+pct(d.iibbTotal,d.revBruto));
+  set('pl-log', '-'+fmt(d.logTotal));
+  set('pl-log-p','-'+pct(d.logTotal,d.revBruto));
+  set('pl-mkt', '-'+fmt(d.mktTotal));
+  set('pl-mkt-p','-'+pct(d.mktTotal,d.revBruto));
+  set('pl-cm',  fmt(d.contribucion));
+  set('pl-cm-p', pct(d.contribucion,d.revBruto));
+  set('pl-fij', '-'+fmt(d.totalFijos));
+  set('pl-fij-p','-'+pct(d.totalFijos,d.revBruto));
+  $('pl-fin-row').className = d.ebitda>=0?'ok-row':'bad-row';
+  set('pl-ebitda', fmt(d.ebitda));
+  set('pl-ebitda-p', pct(d.ebitda,d.revBruto));
+  set('be-txt1', d.be===Infinity?'∞':d.be+'');
+  set('be-txt2', d.be===Infinity?'—':fmt(d.be*S.pr.precio));
+
+  drawWaterfallPL(d);
+  drawDonut(d);
+  drawBEChart(d);
+}
+
+function drawWaterfallPL(d) {
+  const items=[
+    {l:'Revenue bruto',v:d.revBruto,t:'in'},
+    {l:'Devoluciones',v:-d.devTotal,t:'out'},
+    {l:'CMV',v:-d.cmvTotal,t:'out'},
+    {l:'Packaging',v:-d.pkgTotal,t:'out'},
+    {l:'Comis. MP',v:-d.mpTotal,t:'out'},
+    {l:'IIBB',v:-d.iibbTotal,t:'out'},
+    {l:'Logística',v:-d.logTotal,t:'out'},
+    {l:'Marketing',v:-d.mktTotal,t:'out'},
+    {l:'Fijos',v:-d.totalFijos,t:'out'},
+    {l:'EBITDA',v:d.ebitda,t:'net'},
+  ];
+  let running=0;
+  const starts=[],ends=[],colors=[],labels=[],tooltips=[];
+  items.forEach(item=>{
+    if(item.t==='in'){starts.push(0);ends.push(item.v);colors.push('#10b981');}
+    else if(item.t==='out'){const s=Math.max(0,running+item.v);starts.push(s);ends.push(Math.abs(item.v));colors.push('#ef4444');}
+    else{starts.push(0);ends.push(Math.max(0,item.v));colors.push(item.v>=0?'#2563eb':'#dc2626');}
+    if(item.t!=='net') running+=item.v;
+    labels.push(item.l);tooltips.push(Math.abs(item.v));
+  });
+  mkChart('ch-wfpl',{type:'bar',data:{labels,datasets:[
+    {data:starts,backgroundColor:'transparent',borderWidth:0,stack:'s'},
+    {data:ends,backgroundColor:colors,borderRadius:3,stack:'s'},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.datasetIndex===1?fmt(tooltips[c.dataIndex]):''},filter:i=>i.datasetIndex===1}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,ticks:{callback:v=>fmt(v),font:{size:10}},grid:{color:'#f1f5f9'}}}}});
+}
+
+function drawDonut(d) {
+  const pr = S.pr.precio;
+  if(!pr) return;
+  const items=[
+    {l:'Comis. MP',v:d.mpCost},{l:'IIBB',v:d.iibbCost},
+    {l:'Costo producto',v:d.costoARS},{l:'Packaging',v:S.pr.packaging},
+    {l:'Logística',v:d.totalLog},{l:'CAC (ads)',v:d.cacUnit},
+    {l:'Overhead',v:d.ohUnit},{l:'Neto',v:Math.max(0,d.gananciaUnit)},
+  ].filter(i=>i.v>0);
+  const clrs=['#ef4444','#f97316','#3b82f6','#8b5cf6','#06b6d4','#f59e0b','#64748b','#10b981'];
+  mkChart('ch-donut',{type:'doughnut',data:{labels:items.map(i=>i.l),datasets:[{data:items.map(i=>i.v),backgroundColor:clrs,borderWidth:1,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:10,padding:6}},tooltip:{callbacks:{label:c=>c.label+': '+fp2(c.raw/pr*100)}}},cutout:'55%'}});
+}
+
+function drawBEChart(d) {
+  const maxU = Math.max(S.est.unidades * 3, d.be===Infinity ? S.est.unidades*3 : d.be*2, 10);
+  const pts = 20;
+  const labels=[], profits=[];
+  for(let i=0;i<=pts;i++) {
+    const u = Math.round((maxU/pts)*i);
+    const contrib = (d.margenBrutoUnit - d.totalLog - d.cacUnit) * u;
+    const profit = contrib - d.totalFijos;
+    labels.push(u);
+    profits.push(+profit.toFixed(0));
+  }
+  const currentIdx = Math.round((S.est.unidades / maxU) * pts);
+  const ptColors = profits.map((_,i)=> i===currentIdx?'#f97316':'rgba(37,99,235,0)');
+  const ptRadius = ptColors.map(c=>c!=='rgba(37,99,235,0)'?6:0);
+  mkChart('ch-be',{type:'line',data:{labels,datasets:[
+    {data:profits,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,.08)',fill:true,pointBackgroundColor:ptColors,pointRadius:ptRadius,tension:0.3},
+    {data:labels.map(()=>0),borderColor:'#dc2626',borderDash:[5,5],borderWidth:1.5,pointRadius:0,fill:false}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{filter:i=>i.datasetIndex===0,callbacks:{label:c=>fmt(c.raw)+' ganancia'}}},scales:{x:{ticks:{maxTicksLimit:7,font:{size:10}},grid:{display:false},title:{display:true,text:'Unidades/mes',font:{size:10}}},y:{ticks:{callback:v=>fmt(v),font:{size:10}},grid:{color:'#f1f5f9'}}}}});
+}
+
+// --- Escenarios ---
+let _simD = null;
+function updateEscenarios(d) { _simD = d; simR(); }
+
+function simR() {
+  const ids=['pr','co','ad','cv','ud','vl'];
+  const vals={};
+  ids.forEach(id=>{ const el=$('ss-'+id); if(el) vals[id]=+el.value; });
+  ids.forEach(id=>{ const el=$('sv-'+id); if(el) el.textContent=(vals[id]>=0?'+':'')+vals[id]+'%'; });
+
+  const d = _simD || calc();
+  const factor = k => 1 + (vals[k]||0)/100;
+
+  const simPrecio  = S.pr.precio   * factor('pr');
+  const simCosto   = d.costoARS    * factor('co');
+  const simInv     = d.totalInv    * factor('ad');
+  const simConv    = S.mkt.conversion * factor('cv');
+  const simUSD     = S.cfg.usd     * factor('ud');
+  const simVol     = S.est.unidades * factor('vl');
+  const simCac     = simVol > 0 ? simInv / simVol : 0;
+
+  // Recalcular margen neto simulado
+  const mpRate = S.cfg.mp[S.pr.mpKey]/100;
+  const simMpCost  = simPrecio * mpRate * (1 + S.cfg.iva/100);
+  const simIibb    = simPrecio * S.cfg.iibb/100;
+  const simRevNeto = simPrecio - simMpCost - simIibb;
+  const simGan     = simRevNeto - simCosto - S.pr.packaging - d.costoEnvio - (d.perdidaDev+d.reversaCost) - simCac - d.ohUnit;
+  const simMn      = simPrecio > 0 ? (simGan / simPrecio) * 100 : 0;
+  const delta      = simMn - d.margenNetoPct;
+
+  const set=(id,v)=>{const e=$(id);if(e)e.textContent=v;};
+  set('sc-pr', fmt(simPrecio));
+  set('sc-co', fmt(simCosto));
+  set('sc-vol', Math.round(simVol)+' uds');
+  set('sc-mn-actual', fp2(d.margenNetoPct));
+  const simEl = $('sc-mn-sim');
+  if(simEl){ simEl.textContent=fp2(simMn); simEl.style.color=colMn(simMn); }
+  const dEl = $('sc-delta');
+  if(dEl){ dEl.textContent=(delta>=0?'+':'')+delta.toFixed(1)+'pp'; dEl.style.color=delta>=0?'#059669':'#dc2626'; }
+
+  let insight = '';
+  if(Math.abs(vals.pr||0)>0) insight += `Subir precio ${vals.pr}% mejora/empeora la competitividad. `;
+  if(Math.abs(vals.co||0)>0) insight += `Cambio en costo del producto impacta directamente el margen bruto. `;
+  if(Math.abs(vals.ad||0)>0) insight += `${vals.ad>0?'Más':'Menos'} inversión en ads cambia el CAC y el volumen estimado. `;
+  if(Math.abs(vals.ud||0)>0) insight += `Una devaluación del ${vals.ud}% encarece el costo si comprás en USD. `;
+  if(!insight) insight = 'Ajustá los sliders para ver el impacto en tiempo real.';
+  set('sc-insight', insight);
+
+  drawSensChart(d);
+  drawCompChart(d, simMn, simPrecio, simCosto);
+}
+
+function drawSensChart(d) {
+  const range = [-20,-15,-10,-5,0,5,10,15,20,25,30];
+  const byPrecio = range.map(pct=>{
+    const p2 = S.pr.precio*(1+pct/100);
+    const mp2 = p2 * S.cfg.mp[S.pr.mpKey]/100*(1+S.cfg.iva/100);
+    const ii2 = p2 * S.cfg.iibb/100;
+    const g2 = p2 - mp2 - ii2 - d.costoARS - S.pr.packaging - d.costoEnvio - (d.perdidaDev+d.reversaCost) - d.cacUnit - d.ohUnit;
+    return p2>0?+(g2/p2*100).toFixed(1):0;
+  });
+  const byCosto = range.map(pct=>{
+    const c2 = d.costoARS*(1+pct/100);
+    const g2 = d.revNeto - c2 - S.pr.packaging - d.costoEnvio - (d.perdidaDev+d.reversaCost) - d.cacUnit - d.ohUnit;
+    return S.pr.precio>0?+(g2/S.pr.precio*100).toFixed(1):0;
+  });
+  mkChart('ch-sens',{type:'line',data:{labels:range.map(v=>(v>=0?'+':'')+v+'%'),datasets:[
+    {label:'Var. precio',data:byPrecio,borderColor:'#2563eb',pointRadius:4,tension:0.3,fill:false,borderWidth:2},
+    {label:'Var. costo',data:byCosto,borderColor:'#ef4444',pointRadius:4,tension:0.3,fill:false,borderWidth:2,borderDash:[4,4]},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:10},boxWidth:10,padding:8}},tooltip:{mode:'index',callbacks:{label:c=>c.dataset.label+': '+fp2(c.raw)}}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{ticks:{callback:v=>v+'%',font:{size:10}},grid:{color:'#f1f5f9'}}}}});
+}
+
+function drawCompChart(d, simMn, simPrecio, simCosto) {
+  const base = [+d.margenBrutoPct.toFixed(1), +d.margenNetoPct.toFixed(1), +(d.roas).toFixed(2), +d.cacUnit];
+  const sim  = [
+    simPrecio>0?+((simPrecio-simCosto-S.pr.packaging)/simPrecio*100).toFixed(1):0,
+    +simMn.toFixed(1),
+    d.roas,
+    +(d.totalInv*(1+((+$('ss-ad').value)||0)/100)/S.est.unidades/(1+((+$('ss-vl').value)||0)/100)).toFixed(0)
+  ];
+  mkChart('ch-comp',{type:'bar',data:{
+    labels:['Margen bruto %','Margen neto %','ROAS','CAC ($)'],
+    datasets:[
+      {label:'Base',data:base,backgroundColor:'rgba(37,99,235,.7)',borderRadius:4},
+      {label:'Simulado',data:sim,backgroundColor:'rgba(249,115,22,.8)',borderRadius:4},
+    ]
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:10},boxWidth:10,padding:8}},tooltip:{mode:'index'}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{ticks:{font:{size:10}},grid:{color:'#f1f5f9'}}}}});
+}
+
+// ============================================================
+// UI HELPERS
+// ============================================================
+function showTab(id, btn) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('on'));
+  const panel = $('tab-'+id);
+  if(panel) panel.classList.add('on');
+  if(btn) btn.classList.add('on');
+  setTimeout(R, 50);
+}
+
+function selMP(key, btn) {
+  S.pr.mpKey = key;
+  document.querySelectorAll('#mp-sel .tbg').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  R();
+}
+
+function resetSim() {
+  ['pr','co','ad','cv','ud','vl'].forEach(id=>{
+    const el = $('ss-'+id); if(el) el.value=0;
+    const sv = $('sv-'+id); if(sv) sv.textContent='+0%';
+  });
+  simR();
+}
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('DOMContentLoaded', () => {
+  buildMarketingTable();
+  R();
+});
+</script>
+
+<div class="footer-note" style="padding:0 20px 20px">
+  Rentabilidad Ecommerce AR v1.0 · Tiendanube + Mercado Pago + Andreani · Actualizá las tasas periódicamente según cambios en los portales oficiales. 
+  Este sistema es una herramienta de gestión interna y no reemplaza el asesoramiento contable e impositivo profesional.
+</div>
+</body>
+</html>
