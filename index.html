@@ -128,27 +128,27 @@ select{font-family:-apple-system,sans-serif}
 <div class="g2" style="margin-bottom:16px">
   <div class="card">
     <div class="ctitle">Comisiones Mercado Pago <span class="csub">% sin IVA · Checkout Pro en Tiendanube</span></div>
-    <div class="field"><label>1 pago</label><input type="number" value="2.99" step="0.01" min="0" oninput="S.cfg.mp['1p']=+this.value;R()"></div>
-    <div class="field"><label>3 cuotas sin interés</label><input type="number" value="5.99" step="0.01" min="0" oninput="S.cfg.mp['3c']=+this.value;R()"></div>
-    <div class="field"><label>6 cuotas sin interés</label><input type="number" value="9.99" step="0.01" min="0" oninput="S.cfg.mp['6c']=+this.value;R()"></div>
-    <div class="field"><label>12 cuotas sin interés</label><input type="number" value="13.99" step="0.01" min="0" oninput="S.cfg.mp['12c']=+this.value;R()"></div>
-    <div class="field" style="margin-bottom:0"><label>18 cuotas sin interés</label><input type="number" value="17.99" step="0.01" min="0" oninput="S.cfg.mp['18c']=+this.value;R()"></div>
+    <div class="field"><label>1 pago</label><input id="cfg-mp-1p" type="number" value="2.99" step="0.01" min="0" oninput="S.cfg.mp['1p']=+this.value;R()"></div>
+    <div class="field"><label>3 cuotas sin interés</label><input id="cfg-mp-3c" type="number" value="5.99" step="0.01" min="0" oninput="S.cfg.mp['3c']=+this.value;R()"></div>
+    <div class="field"><label>6 cuotas sin interés</label><input id="cfg-mp-6c" type="number" value="9.99" step="0.01" min="0" oninput="S.cfg.mp['6c']=+this.value;R()"></div>
+    <div class="field"><label>12 cuotas sin interés</label><input id="cfg-mp-12c" type="number" value="13.99" step="0.01" min="0" oninput="S.cfg.mp['12c']=+this.value;R()"></div>
+    <div class="field" style="margin-bottom:0"><label>18 cuotas sin interés</label><input id="cfg-mp-18c" type="number" value="17.99" step="0.01" min="0" oninput="S.cfg.mp['18c']=+this.value;R()"></div>
   </div>
   <div class="stack">
     <div class="card">
       <div class="ctitle">Impuestos y retenciones</div>
       <div class="g2">
-        <div class="field" style="margin-bottom:0"><label>IIBB (%)</label><input type="number" value="3" step="0.1" min="0" oninput="S.cfg.iibb=+this.value;R()"></div>
-        <div class="field" style="margin-bottom:0"><label>IVA sobre comisión (%)</label><input type="number" value="21" step="1" min="0" oninput="S.cfg.iva=+this.value;R()"></div>
+        <div class="field" style="margin-bottom:0"><label>IIBB (%)</label><input id="cfg-iibb" type="number" value="3" step="0.1" min="0" oninput="S.cfg.iibb=+this.value;R()"></div>
+        <div class="field" style="margin-bottom:0"><label>IVA sobre comisión (%)</label><input id="cfg-iva" type="number" value="21" step="1" min="0" oninput="S.cfg.iva=+this.value;R()"></div>
       </div>
     </div>
     <div class="card">
       <div class="ctitle">Tiendanube</div>
-      <div class="field" style="margin-bottom:0"><label>Plan mensual (ARS)</label><input type="number" value="15999" step="500" min="0" oninput="S.cfg.tiendanube=+this.value;R()"></div>
+      <div class="field" style="margin-bottom:0"><label>Plan mensual (ARS)</label><input id="cfg-tn" type="number" value="15999" step="500" min="0" oninput="S.cfg.tiendanube=+this.value;R()"></div>
     </div>
     <div class="card">
       <div class="ctitle">Tipo de cambio</div>
-      <div class="field" style="margin-bottom:0"><label>1 USD = X pesos (ARS)</label><input type="number" value="1180" step="10" min="1" oninput="S.cfg.usd=+this.value;R()"></div>
+      <div class="field" style="margin-bottom:0"><label>1 USD = X pesos (ARS)</label><input id="cfg-usd" type="number" value="1180" step="10" min="1" oninput="S.cfg.usd=+this.value;R()"></div>
     </div>
   </div>
 </div>
@@ -157,11 +157,11 @@ select{font-family:-apple-system,sans-serif}
   <table class="dt">
     <thead><tr><th>Zona</th><th>Ciudades principales</th><th style="width:180px">Costo base (ARS)</th></tr></thead>
     <tbody>
-      <tr><td><strong>AMBA</strong></td><td class="neu">Capital Federal + Gran Buenos Aires</td><td><input class="ci" type="number" value="2800" step="100" oninput="S.cfg.zonas.amba=+this.value;R()"></td></tr>
-      <tr><td><strong>Interior cercano</strong></td><td class="neu">Córdoba, Rosario, La Plata, Mar del Plata</td><td><input class="ci" type="number" value="3800" step="100" oninput="S.cfg.zonas.int_c=+this.value;R()"></td></tr>
-      <tr><td><strong>Interior lejano</strong></td><td class="neu">Mendoza, Santa Fe, San Luis, Entre Ríos</td><td><input class="ci" type="number" value="5200" step="100" oninput="S.cfg.zonas.int_l=+this.value;R()"></td></tr>
-      <tr><td><strong>NOA / NEA</strong></td><td class="neu">Salta, Jujuy, Misiones, Chaco, Formosa</td><td><input class="ci" type="number" value="7500" step="100" oninput="S.cfg.zonas.noa=+this.value;R()"></td></tr>
-      <tr><td><strong>Patagonia</strong></td><td class="neu">Neuquén, Río Negro, Santa Cruz, T. del Fuego</td><td><input class="ci" type="number" value="9000" step="100" oninput="S.cfg.zonas.pat=+this.value;R()"></td></tr>
+      <tr><td><strong>AMBA</strong></td><td class="neu">Capital Federal + Gran Buenos Aires</td><td><input id="cfg-z-amba" class="ci" type="number" value="2800" step="100" oninput="S.cfg.zonas.amba=+this.value;R()"></td></tr>
+      <tr><td><strong>Interior cercano</strong></td><td class="neu">Córdoba, Rosario, La Plata, Mar del Plata</td><td><input id="cfg-z-intc" class="ci" type="number" value="3800" step="100" oninput="S.cfg.zonas.int_c=+this.value;R()"></td></tr>
+      <tr><td><strong>Interior lejano</strong></td><td class="neu">Mendoza, Santa Fe, San Luis, Entre Ríos</td><td><input id="cfg-z-intl" class="ci" type="number" value="5200" step="100" oninput="S.cfg.zonas.int_l=+this.value;R()"></td></tr>
+      <tr><td><strong>NOA / NEA</strong></td><td class="neu">Salta, Jujuy, Misiones, Chaco, Formosa</td><td><input id="cfg-z-noa" class="ci" type="number" value="7500" step="100" oninput="S.cfg.zonas.noa=+this.value;R()"></td></tr>
+      <tr><td><strong>Patagonia</strong></td><td class="neu">Neuquén, Río Negro, Santa Cruz, T. del Fuego</td><td><input id="cfg-z-pat" class="ci" type="number" value="9000" step="100" oninput="S.cfg.zonas.pat=+this.value;R()"></td></tr>
     </tbody>
   </table>
 </div>
@@ -1191,25 +1191,27 @@ function loadState() {
   }
 }
 
-// Vuelca el estado S a todos los inputs del DOM
+// Vuelca el estado S a todos los inputs del DOM — 1 id por campo, sin posiciones frágiles
 function applyStateToDOM() {
   const set = (id, v) => { const e = document.getElementById(id); if(e) e.value = v; };
-  // Config
-  document.querySelectorAll('#tab-config input[type=number]').forEach(() => {}); // handled individually
-  // Los inputs de config no tienen id únicos — los seteamos por posición de la estructura
-  // Usamos una tabla de mapeo id → path en S
-  const configInputs = [
-    // [selector_aproximado, valor]
-    // Los inputs de config son los primeros number inputs del tab
-  ];
-  // Mejor estrategia: reasignar directamente via los selectores que tenemos
-  setInputByTabOrder('tab-config', [
-    S.cfg.mp['1p'], S.cfg.mp['3c'], S.cfg.mp['6c'], S.cfg.mp['12c'], S.cfg.mp['18c'],
-    S.cfg.iibb, S.cfg.iva, S.cfg.tiendanube, S.cfg.usd,
-    S.cfg.zonas.amba, S.cfg.zonas.int_c, S.cfg.zonas.int_l, S.cfg.zonas.noa, S.cfg.zonas.pat
-  ]);
 
-  // Producto
+  // ── Configuración global ─────────────────────────────────
+  set('cfg-mp-1p',  S.cfg.mp['1p']);
+  set('cfg-mp-3c',  S.cfg.mp['3c']);
+  set('cfg-mp-6c',  S.cfg.mp['6c']);
+  set('cfg-mp-12c', S.cfg.mp['12c']);
+  set('cfg-mp-18c', S.cfg.mp['18c']);
+  set('cfg-iibb',   S.cfg.iibb);
+  set('cfg-iva',    S.cfg.iva);
+  set('cfg-tn',     S.cfg.tiendanube);
+  set('cfg-usd',    S.cfg.usd);
+  set('cfg-z-amba', S.cfg.zonas.amba);
+  set('cfg-z-intc', S.cfg.zonas.int_c);
+  set('cfg-z-intl', S.cfg.zonas.int_l);
+  set('cfg-z-noa',  S.cfg.zonas.noa);
+  set('cfg-z-pat',  S.cfg.zonas.pat);
+
+  // ── Producto ─────────────────────────────────────────────
   set('p-nombre', S.pr.nombre);
   set('p-costo',  S.pr.costo);
   set('p-pack',   S.pr.packaging);
@@ -1219,20 +1221,20 @@ function applyStateToDOM() {
   const monedaSel = document.getElementById('p-moneda');
   if(monedaSel) monedaSel.value = S.pr.moneda;
 
-  // Método de pago
+  // Método de pago — botones toggle
   document.querySelectorAll('#mp-sel .tbg').forEach(b => b.classList.remove('on'));
   const mpBtns = {'1p':0,'3c':1,'6c':2,'12c':3,'18c':4};
-  const mpIdx = mpBtns[S.pr.mpKey];
   const mpBtnList = document.querySelectorAll('#mp-sel .tbg');
+  const mpIdx = mpBtns[S.pr.mpKey] ?? 0;
   if(mpBtnList[mpIdx]) mpBtnList[mpIdx].classList.add('on');
 
-  // Marketing
+  // ── Marketing ────────────────────────────────────────────
   set('m-ses',    S.mkt.sesiones);
   set('m-conv',   S.mkt.conversion);
   set('m-nuevos', S.mkt.nuevos);
   set('m-freq',   S.mkt.frecuencia);
 
-  // Logística
+  // ── Logística ────────────────────────────────────────────
   const zonaSel = document.getElementById('l-zona');
   if(zonaSel) zonaSel.value = S.log.zona;
   set('l-ff',  S.log.fulfillment);
@@ -1240,18 +1242,17 @@ function applyStateToDOM() {
   set('l-rev', S.log.reversa);
   set('l-rec', S.log.recuperacion);
   const slDev = document.getElementById('sl-dev');
-  if(slDev) { slDev.value = S.log.devRate; }
+  if(slDev) slDev.value = S.log.devRate;
   const dvv = document.getElementById('dev-rate-v');
   if(dvv) dvv.textContent = S.log.devRate + '%';
-  // Botones de envío gratis
   const envSi = document.getElementById('env-si');
   const envNo = document.getElementById('env-no');
   if(envSi && envNo) {
-    if(S.log.gratis) { envSi.classList.add('on'); envNo.classList.remove('on'); }
-    else             { envNo.classList.add('on'); envSi.classList.remove('on'); }
+    if(S.log.gratis) { envSi.classList.add('on');  envNo.classList.remove('on'); }
+    else             { envNo.classList.add('on');  envSi.classList.remove('on'); }
   }
 
-  // Estructura
+  // ── Estructura ───────────────────────────────────────────
   set('e-sue', S.est.sueldos);
   set('e-alq', S.est.alquiler);
   set('e-her', S.est.herramientas);
@@ -1260,13 +1261,6 @@ function applyStateToDOM() {
   set('e-srv', S.est.servicios);
   set('e-otr', S.est.otros);
   set('e-ud',  S.est.unidades);
-}
-
-function setInputByTabOrder(tabId, values) {
-  const tab = document.getElementById('tab-' + tabId);
-  if(!tab) return;
-  const inputs = tab.querySelectorAll('input[type=number]');
-  values.forEach((v, i) => { if(inputs[i]) inputs[i].value = v; });
 }
 
 function resetAll() {
